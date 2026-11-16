@@ -56,7 +56,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
         </div>
-        <HireBox agent={{ id: a.id, name: a.name, handle: a.handle, fireAt: a.fireAt, status: a.status, hires: a.hires }} />
+        <HireBox agent={{ id: a.id, name: a.name, handle: a.handle, fireAt: a.fireAt, status: a.status, hires: a.hires, live: a.live }} />
       </div>
     </main>
   );

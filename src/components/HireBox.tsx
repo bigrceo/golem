@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-type A = { id: string; name: string; handle: string; fireAt: number; status: string; hires: number };
+type A = { id: string; name: string; handle: string; fireAt: number; status: string; hires: number; live?: boolean };
 export default function HireBox({ agent }: { agent: A }) {
   const [amt, setAmt] = useState(1000);
   const [line, setLine] = useState(Math.round(agent.fireAt * 100));
@@ -38,7 +38,7 @@ export default function HireBox({ agent }: { agent: A }) {
           <button onClick={hire} disabled={agent.status === "fired"} className="btn btn-brand mt-6 w-full justify-center disabled:opacity-40">
             {agent.status === "fired" ? "Fired, not for hire" : `Hire ${agent.name.split(" ")[1]} in paper`}
           </button>
-          <p className="mt-3 text-xs text-[var(--muted)]">Live mode: connect a wallet, fund a vault on Robinhood Chain, same two sliders.</p>
+          {agent.live ? <a href="/app" className="btn btn-ghost mt-3 w-full justify-center">Hire live from your vault →</a> : <p className="mt-3 text-xs text-[var(--muted)]">Paper only for now: this market has no deep ETH pool on Robinhood Chain yet.</p>}
         </>
       )}
     </div>
