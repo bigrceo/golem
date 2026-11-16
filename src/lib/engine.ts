@@ -5,29 +5,29 @@ export type Market = { id: MarketId; name: string; kind: "crypto" | "stock"; can
 export type Decision = { t: number; action: "BUY" | "SELL" | "HOLD" | "FIRED"; market: MarketId; reason: string; price: number; equity: number };
 export type AgentSpec = {
   id: string; name: string; handle: string; strategy: string; markets: MarketId[];
-  fireAt: number; pitch: string; hires: number; risk: "Low" | "Medium" | "High";
+  fireAt: number; pitch: string; hires: number; risk: "Low" | "Medium" | "High"; live: boolean;
 };
 export type AgentResult = AgentSpec & {
   equity: number; pnl: number; holdPnl: number; edge: number; trades: number; maxDrawdown: number;
-  status: "working" | "fired"; curve: number[]; decisions: Decision[]; lastAction: Decision | null; winRate: number;
+  status: "working" | "fired"; curve: number[]; decisions: Decision[]; lastAction: Decision | null; winRate: number; inPosition: boolean; signal: string;
 };
 
 export const AGENTS: AgentSpec[] = [
-  { id: "breakout-btc", name: "Breakout Bob", handle: "bob", strategy: "24h breakout", markets: ["BTC"], fireAt: 0.06, risk: "Medium", hires: 418,
+  { id: "breakout-btc", name: "Breakout Bob", handle: "bob", live: false, strategy: "24h breakout", markets: ["BTC"], fireAt: 0.06, risk: "Medium", hires: 418,
     pitch: "Buys BTC when it clears the 24h high, sells when it loses the 12h low. Never guesses, never averages down." },
-  { id: "meanrev-eth", name: "Dip Daisy", handle: "daisy", strategy: "RSI mean reversion", markets: ["ETH"], fireAt: 0.07, risk: "Medium", hires: 362,
+  { id: "meanrev-eth", name: "Dip Daisy", handle: "daisy", live: false, strategy: "RSI mean reversion", markets: ["ETH"], fireAt: 0.07, risk: "Medium", hires: 362,
     pitch: "Buys ETH when RSI drops under 32, sells it back over 68. Loves red candles, hates holding bags." },
-  { id: "momo-sol", name: "Momo Max", handle: "max", strategy: "EMA 9/21 cross", markets: ["SOL"], fireAt: 0.09, risk: "High", hires: 290,
+  { id: "momo-sol", name: "Momo Max", handle: "max", live: false, strategy: "EMA 9/21 cross", markets: ["SOL"], fireAt: 0.09, risk: "High", hires: 290,
     pitch: "Rides SOL when the fast average crosses the slow one. Fast in, fast out." },
-  { id: "dca-btc", name: "Patient Pat", handle: "pat", strategy: "Hourly DCA", markets: ["BTC"], fireAt: 0.12, risk: "Low", hires: 611,
+  { id: "dca-btc", name: "Patient Pat", handle: "pat", live: false, strategy: "Hourly DCA", markets: ["BTC"], fireAt: 0.12, risk: "Low", hires: 611,
     pitch: "Buys a slice of BTC every six hours whatever the chart looks like. Boring on purpose." },
-  { id: "breakout-tsla", name: "Tesla Tina", handle: "tina", strategy: "Open-range breakout", markets: ["TSLA"], fireAt: 0.05, risk: "Medium", hires: 247,
+  { id: "breakout-tsla", name: "Tesla Tina", handle: "tina", live: true, strategy: "Open-range breakout", markets: ["TSLA"], fireAt: 0.05, risk: "Medium", hires: 247,
     pitch: "Trades the Robinhood TSLA token on the open-range breakout, flat before the close." },
-  { id: "momo-nvda", name: "Chip Chad", handle: "chad", strategy: "EMA 9/21 cross", markets: ["NVDA"], fireAt: 0.05, risk: "Medium", hires: 331,
+  { id: "momo-nvda", name: "Chip Chad", handle: "chad", live: true, strategy: "EMA 9/21 cross", markets: ["NVDA"], fireAt: 0.05, risk: "Medium", hires: 331,
     pitch: "Momentum on the NVDA token. Long when the trend is up, cash when it bends." },
-  { id: "meanrev-aapl", name: "Apple Amy", handle: "amy", strategy: "RSI mean reversion", markets: ["AAPL"], fireAt: 0.04, risk: "Low", hires: 198,
+  { id: "meanrev-aapl", name: "Apple Amy", handle: "amy", live: true, strategy: "RSI mean reversion", markets: ["AAPL"], fireAt: 0.04, risk: "Low", hires: 198,
     pitch: "Buys AAPL token dips under RSI 35, takes profit over 65. Small moves, many of them." },
-  { id: "rotate-crypto", name: "Rotator Rex", handle: "rex", strategy: "Strongest-of-three rotation", markets: ["BTC", "ETH", "SOL"], fireAt: 0.08, risk: "High", hires: 274,
+  { id: "rotate-crypto", name: "Rotator Rex", handle: "rex", live: false, strategy: "Strongest-of-three rotation", markets: ["BTC", "ETH", "SOL"], fireAt: 0.08, risk: "High", hires: 274,
     pitch: "Every 6 hours, moves the whole stack into whichever of BTC, ETH or SOL moved most in the last day." },
 ];
 
@@ -54,7 +54,7 @@ const pct = (x: number) => Math.round(x * 10000) / 100;
 
 type Sim = { cash: number; units: number; equity: number; peak: number; dd: number; trades: number; wins: number; entry: number; decisions: Decision[]; curve: number[]; fired: boolean };
 
-function run(spec: AgentSpec, mk: Record<MarketId, Market>): AgentResult {
+function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): AgentResult {
   const s: Sim = { cash: START, units: 0, equity: START, peak: START, dd: 0, trades: 0, wins: 0, entry: 0, decisions: [], curve: [], fired: false };
   const main = mk[spec.markets[0]];
   const n = Math.min(...spec.markets.map((m) => mk[m].candles.length));
@@ -81,7 +81,7 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>): AgentResult {
     s.equity = s.cash + s.units * p; s.curve.push(s.equity);
     s.peak = Math.max(s.peak, s.equity); s.dd = Math.max(s.dd, 1 - s.equity / s.peak);
     if (s.fired) continue;
-    if (1 - s.equity / s.peak >= spec.fireAt) {
+    if (!noFire && 1 - s.equity / s.peak >= spec.fireAt) {
       s.fired = true; sell(i, held, "drawdown limit hit");
       note(i, "FIRED", held, `down ${pct(1 - s.equity / s.peak)}% from peak, limit ${pct(spec.fireAt)}%. Funds back in the vault.`, p);
       continue;
@@ -141,10 +141,12 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>): AgentResult {
     trades: s.trades, maxDrawdown: pct(s.dd), status: s.fired ? "fired" : "working", curve: s.curve.map((v) => Math.round(v)),
     decisions: s.decisions.slice(-40).reverse(), lastAction: s.decisions[s.decisions.length - 1] ?? null,
     winRate: closed ? Math.round((s.wins / closed) * 100) : 0,
+    inPosition: s.units > 0,
+    signal: s.decisions.length ? s.decisions[s.decisions.length - 1].reason : "warming up",
   };
 }
 
-export function runDesk(markets: Market[]) {
+export function runDesk(markets: Market[], noFire = false) {
   const mk = Object.fromEntries(markets.map((m) => [m.id, m])) as Record<MarketId, Market>;
-  return AGENTS.filter((a) => a.markets.every((m) => mk[m]?.candles.length > 30)).map((a) => run(a, mk)).sort((a, b) => b.edge - a.edge);
+  return AGENTS.filter((a) => a.markets.every((m) => mk[m]?.candles.length > 30)).map((a) => run(a, mk, noFire)).sort((a, b) => b.edge - a.edge);
 }

@@ -6,13 +6,19 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "keeper": "tsx src/keeper/run.ts",
+    "keeper:once": "tsx src/keeper/run.ts --once"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.107.1",
     "motion": "^14.14.0",
     "next": "16.4.6",
+    "postgres": "^4.1.1",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "viem": "^2.57.20",
+    "wagmi": "^3.7.11"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
@@ -22,6 +28,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
