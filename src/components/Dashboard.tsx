@@ -49,7 +49,7 @@ export default function Dashboard() {
   };
   const refreshAll = () => Promise.all([refetchVault(), refetchJob(), refetchBal()]);
 
-  if (!FACTORY) return <Shell><p className="text-[var(--muted)]">Factory address not configured. Set NEXT_PUBLIC_FACTORY.</p></Shell>;
+  if (!FACTORY) return <Shell><div className="card p-10 text-center max-w-xl mx-auto"><span className="mark !w-10 !h-10 inline-block" /><h2 className="text-3xl font-bold mt-6">Vaults open at launch.</h2><p className="mt-3 text-[var(--muted)]">The agents already trade in public on the desk. Live vaults on Robinhood Chain open with $HIRE.</p><Link href="/agents" className="btn btn-brand mt-8">Watch the desk</Link></div></Shell>;
 
   if (!isConnected) return (
     <Shell>

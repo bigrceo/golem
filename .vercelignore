@@ -1,0 +1,5 @@
+.env*
+data
+contracts
+.next
+node_modules

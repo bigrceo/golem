@@ -9,8 +9,17 @@ const STOCKS: { id: MarketId; name: string }[] = [
 
 async function binance(sym: string): Promise<Candle[]> {
   const r = await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=1h&limit=168`, { next: { revalidate: 60 } });
-  const rows: (string | number)[][] = await r.json();
+  const rows = await r.json(); if (!Array.isArray(rows)) throw new Error("binance blocked");
   return rows.map((k) => ({ t: +k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4] }));
+}
+async function coinbase(sym: string): Promise<Candle[]> {
+  const r = await fetch(`https://api.exchange.coinbase.com/products/${sym}-USD/candles?granularity=3600`, { headers: { "user-agent": "hire" }, next: { revalidate: 60 } });
+  const rows: number[][] = await r.json();
+  return rows.slice(0, 168).reverse().map((k) => ({ t: k[0] * 1000, l: k[1], h: k[2], o: k[3], c: k[4] }));
+}
+async function crypto(id: string, sym: string): Promise<Candle[]> {
+  try { const c = await binance(sym); if (Array.isArray(c) && c.length > 30) return c; } catch {}
+  return coinbase(id);
 }
 async function yahoo(sym: string): Promise<Candle[]> {
   const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1h&range=1mo`, {
@@ -25,7 +34,7 @@ async function yahoo(sym: string): Promise<Candle[]> {
 
 export async function loadMarkets(): Promise<Market[]> {
   const jobs = [
-    ...CRYPTO.map(async (m) => { try { const c = await binance(m.sym); return mk(m.id, m.name, "crypto", c); } catch { return null; } }),
+    ...CRYPTO.map(async (m) => { try { const c = await crypto(m.id, m.sym); return mk(m.id, m.name, "crypto", c); } catch { return null; } }),
     ...STOCKS.map(async (m) => { try { const c = await yahoo(m.id); return mk(m.id, m.name, "stock", c); } catch { return null; } }),
   ];
   return (await Promise.all(jobs)).filter(Boolean) as Market[];
