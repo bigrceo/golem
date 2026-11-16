@@ -4,7 +4,7 @@ export default function Spark({ data, w = 160, h = 44, color = "var(--brand)", f
   const pts = data.map((v, i) => [(i / (data.length - 1)) * w, h - ((v - min) / r) * (h - 4) - 2]);
   const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="overflow-visible">
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ width: "100%", maxWidth: w, height: h }} className="overflow-visible block">
       {fill && <path d={`${d} L${w},${h} L0,${h} Z`} fill={color} opacity={0.12} />}
       <path d={d} fill="none" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
     </svg>

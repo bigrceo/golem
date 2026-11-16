@@ -20,7 +20,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   return (
     <main className="mx-auto max-w-7xl px-5 py-12">
       <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-black">← The desk</Link>
-      <div className="mt-6 grid lg:grid-cols-[1.4fr_1fr] gap-10">
+      <div className="mt-6 grid lg:grid-cols-[minmax(0,1fr)_340px] gap-10">
         <div>
           <div className="flex items-center gap-4">
             <Avatar id={a.id} name={a.name} size={64} />
