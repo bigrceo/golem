@@ -54,7 +54,10 @@ const pct = (x: number) => Math.round(x * 10000) / 100;
 
 type Sim = { cash: number; units: number; equity: number; peak: number; dd: number; trades: number; wins: number; entry: number; decisions: Decision[]; curve: number[]; fired: boolean };
 
-function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): AgentResult {
+export type RunOpts = { noFire?: boolean; since?: number; cash?: number; fireAt?: number };
+function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFireOrOpts: boolean | RunOpts = false): AgentResult {
+  const o: RunOpts = typeof noFireOrOpts === "boolean" ? { noFire: noFireOrOpts } : noFireOrOpts;
+  const noFire = !!o.noFire; const fireAt = o.fireAt ?? spec.fireAt;
   const s: Sim = { cash: START, units: 0, equity: START, peak: START, dd: 0, trades: 0, wins: 0, entry: 0, decisions: [], curve: [], fired: false };
   const main = mk[spec.markets[0]];
   const n = Math.min(...spec.markets.map((m) => mk[m].candles.length));
@@ -76,14 +79,23 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): Age
     s.cash = s.units * p * (1 - FEE); if (p > s.entry) s.wins++; s.units = 0; s.trades++; note(i, "SELL", m, reason, p);
   };
   const warm = 24;
+  // A hire starts at the first candle at/after `since`: the vault takes the agent's position at that moment.
+  const start = o.since ? Math.max(warm, candles.findIndex((c) => c.t >= o.since!) < 0 ? n - 1 : candles.findIndex((c) => c.t >= o.since!)) : 0;
+  const cash0 = o.cash ?? START;
   for (let i = 0; i < n; i++) {
     const p = closes[held][i];
-    s.equity = s.cash + s.units * p; s.curve.push(s.equity);
+    if (o.since && i === start) {
+      const eq = s.cash + s.units * p;
+      if (s.units > 0) { s.units = (cash0 / eq) * s.units; s.cash = 0; } else { s.cash = cash0; }
+      s.peak = cash0; s.dd = 0; s.trades = 0; s.wins = 0; s.decisions = []; s.curve = []; s.fired = false;
+      note(i, "HOLD", held, s.units > 0 ? `hired while long ${held}, position carried over` : `hired, in cash, reading ${held}`, p);
+    }
+    s.equity = s.cash + s.units * p; if (i >= start) s.curve.push(s.equity);
     s.peak = Math.max(s.peak, s.equity); s.dd = Math.max(s.dd, 1 - s.equity / s.peak);
     if (s.fired) continue;
-    if (!noFire && 1 - s.equity / s.peak >= spec.fireAt) {
+    if (!noFire && i >= start && 1 - s.equity / s.peak >= fireAt) {
       s.fired = true; sell(i, held, "drawdown limit hit");
-      note(i, "FIRED", held, `down ${pct(1 - s.equity / s.peak)}% from peak, limit ${pct(spec.fireAt)}%. Funds back in the vault.`, p);
+      note(i, "FIRED", held, `down ${pct(1 - s.equity / s.peak)}% from peak, limit ${pct(fireAt)}%. Funds back in the vault.`, p);
       continue;
     }
     if (i < warm) continue;
@@ -114,7 +126,7 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): Age
       }
       case "Hourly DCA": {
         if (i % 6 === 0 && s.cash > 1) {
-          const spend = Math.min(s.cash, START / 20); const price = c[i];
+          const spend = Math.min(s.cash, cash0 / 20); const price = c[i];
           s.units += (spend * (1 - FEE)) / price; s.cash -= spend; s.trades++; s.entry = price;
           note(i, "BUY", m, `slice ${Math.round(spend)} USDG of ${m} at ${price.toFixed(0)}`, price);
         } else lastHold(`next ${m} slice in ${6 - (i % 6)}h`);
@@ -133,8 +145,8 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): Age
     }
   }
   const hold = closes[spec.markets[0]];
-  const holdPnl = hold[n - 1] / hold[warm] - 1;
-  const pnl = s.equity / START - 1;
+  const holdPnl = hold[n - 1] / hold[Math.max(warm, start)] - 1;
+  const pnl = s.equity / (o.since ? cash0 : START) - 1;
   const closed = s.decisions.filter((d) => d.action === "SELL").length;
   return {
     ...spec, equity: Math.round(s.equity * 100) / 100, pnl: pct(pnl), holdPnl: pct(holdPnl), edge: pct(pnl - holdPnl),
@@ -149,4 +161,12 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFire = false): Age
 export function runDesk(markets: Market[], noFire = false) {
   const mk = Object.fromEntries(markets.map((m) => [m.id, m])) as Record<MarketId, Market>;
   return AGENTS.filter((a) => a.markets.every((m) => mk[m]?.candles.length > 30)).map((a) => run(a, mk, noFire)).sort((a, b) => b.edge - a.edge);
+}
+
+/** Replays one paper hire from `since` with the owner's cash and firing line, on live prices. */
+export function replayHire(markets: Market[], agentId: string, since: number, cash: number, fireAt: number) {
+  const mk = Object.fromEntries(markets.map((m) => [m.id, m])) as Record<MarketId, Market>;
+  const spec = AGENTS.find((a) => a.id === agentId);
+  if (!spec || !spec.markets.every((m) => mk[m]?.candles.length > 30)) return null;
+  return run(spec, mk, { since, cash, fireAt });
 }

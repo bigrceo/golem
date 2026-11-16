@@ -4,6 +4,7 @@ import { loadMarkets } from "@/lib/market";
 import { runDesk } from "@/lib/engine";
 import Spark from "@/components/Spark";
 import HireBox from "@/components/HireBox";
+import Avatar from "@/components/Avatar";
 import { money, signed, hhmm } from "@/lib/fmt";
 
 export const revalidate = 60;
@@ -18,11 +19,11 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   const fired = a.status === "fired";
   return (
     <main className="mx-auto max-w-7xl px-5 py-12">
-      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-white">← The desk</Link>
+      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-black">← The desk</Link>
       <div className="mt-6 grid lg:grid-cols-[1.4fr_1fr] gap-10">
         <div>
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-[var(--bg2)] border border-[var(--line)] flex items-center justify-center font-bold text-2xl text-[var(--brand)]">{a.name[0]}</div>
+            <Avatar id={a.id} name={a.name} size={64} />
             <div>
               <h1 className="text-4xl font-bold tracking-tight">{a.name}</h1>
               <div className="text-[var(--muted)]">#{rank} on the desk · {a.strategy} · {a.markets.join(" / ")} · ${a.handle.toUpperCase()}</div>

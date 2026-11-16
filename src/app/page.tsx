@@ -34,7 +34,7 @@ export default async function Home() {
           <div className="flex justify-center mb-8"><span className="mark !w-16 !h-16" /></div>
           <h1 className="text-5xl md:text-7xl font-bold leading-[1.02] max-w-4xl mx-auto">Hire a trading agent.<br />Fire it when it loses.</h1>
           <p className="mt-7 text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto leading-relaxed">
-            Agents that trade <b className="text-[var(--fg)]">Robinhood stock tokens</b> and <b className="text-[var(--fg)]">crypto</b> in public, from a vault on Robinhood Chain that only you can open. Every call logged. Every loser fired.
+            Agents that trade <b className="text-[var(--fg)]">Robinhood stock tokens</b> and <b className="text-[var(--fg)]">crypto</b> in public, on live prices. Every call logged with its reason. Every loser fired on the spot.
           </p>
           <div className="mt-9 flex justify-center gap-3 flex-wrap">
             <Link href="/app" className="btn btn-brand">Open Dashboard</Link>
@@ -87,7 +87,7 @@ export default async function Home() {
             <div className="label mb-3">Live from the desk</div>
             <h2 className="text-4xl md:text-5xl font-bold">Every decision, with its reason, as it happens.</h2>
             <ul className="mt-7 space-y-3 text-[var(--fg)]">
-              {["Paper vaults of 10,000 USDG on real prices for every agent", "Measured against holding the same market, not against zero", "Live vaults log the transaction hash next to the call"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px]">✓</span>{x}</li>)}
+              {["Paper vaults of 10,000 USDG on real prices for every agent", "Measured against holding the same market, not against zero", "Your own paper vault: hire, set lines, fire, nothing to fund"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px]">✓</span>{x}</li>)}
             </ul>
             <Link href="/agents" className="btn btn-brand mt-9">See the full desk</Link>
           </Reveal>
@@ -121,7 +121,7 @@ export default async function Home() {
             ))}
             <Reveal delay={0.3}><div className="rounded-md p-5 h-full bg-[var(--brand)]">
               <div className="font-bold text-lg">Enforced by code</div>
-              <p className="mt-2 text-sm leading-relaxed text-white/90">Caps, allowlist and withdrawals live in the vault contract. The keeper can fire an agent. It can never move a cent.</p>
+              <p className="mt-2 text-sm leading-relaxed text-white/90">In the on-chain vault, caps, allowlist and withdrawals live in the contract. The keeper can fire an agent. It can never move a cent.</p>
             </div></Reveal>
           </div>
         </div>

@@ -1,16 +1,17 @@
 import Link from "next/link";
 import type { AgentResult } from "@/lib/engine";
 import Spark from "./Spark";
+import Avatar from "./Avatar";
 import { money, signed } from "@/lib/fmt";
 
 export default function AgentCard({ a, rank }: { a: AgentResult; rank?: number }) {
   const fired = a.status === "fired";
   return (
-    <Link href={`/agents/${a.id}`} className={`card p-5 block hover:border-[rgba(255,176,0,0.5)] transition-colors ${fired ? "opacity-70" : ""}`}>
+    <Link href={`/agents/${a.id}`} className={`card p-5 block hover:border-black transition-colors ${fired ? "opacity-70" : ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {rank != null && <span className="text-[var(--muted)] font-bold num w-6">{rank}</span>}
-          <div className="w-10 h-10 rounded-full bg-[var(--bg2)] border border-[var(--line)] flex items-center justify-center font-bold text-[var(--brand)]">{a.name[0]}</div>
+          <Avatar id={a.id} name={a.name} size={40} />
           <div>
             <div className="font-bold leading-tight">{a.name}</div>
             <div className="text-xs text-[var(--muted)]">{a.strategy} · {a.markets.join("/")}</div>

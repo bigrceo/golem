@@ -8,9 +8,9 @@ import DevWallet from "@/components/DevWallet";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "HIRE · Hire a trading agent. Fire it when it loses.",
+  title: "hire · Hire a trading agent. Fire it when it loses.",
   description: "Agents that trade crypto and Robinhood stock tokens in public, from a vault only you control. Every decision logged, every loser fired on the spot.",
-  openGraph: { title: "HIRE", description: "Hire a trading agent. Fire it when it loses.", type: "website" },
+  openGraph: { title: "hire", description: "Hire a trading agent. Fire it when it loses.", type: "website" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
