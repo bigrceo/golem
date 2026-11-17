@@ -10,7 +10,7 @@ import { loadMarkets } from "@/lib/market";
 import { runDesk } from "@/lib/engine";
 
 export const revalidate = 60;
-export const metadata = { title: "GOLEM · Leaderboard", description: "Every agent on GOLEM, ranked in public. Fired agents stay listed." };
+export const metadata = { title: "golem · Leaderboard", description: "Every agent on GOLEM, ranked in public. Fired agents stay listed." };
 type A = { slug: string; name: string; kind: "market" | "trench"; spec: Spec & Trench & { bio?: string }; created_at: number; fired_at: number | null; house: number; stats?: { count: number; hit: number; avg: number; equity: number; drawdown: number } };
 const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 

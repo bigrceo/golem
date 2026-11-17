@@ -5,7 +5,7 @@ import { hhmm } from "@/lib/fmt";
 import NodeGrid from "@/components/neural/NodeGrid";
 import TokenLogo from "@/components/TokenLogo";
 export const revalidate = 30;
-export const metadata = { title: "GOLEM · The floor", description: "Every Robinhood Chain pool, read from the chain, run through the Gate." };
+export const metadata = { title: "golem · The floor", description: "Every Robinhood Chain pool, read from the chain, run through the Gate." };
 type Floor = { lastRun: number; stats: { pools: number; tracked: number; calls: number; blocked: number; passed: number; agents: number } | null; tokens: FloorToken[]; checks: { agent: string; symbol: string; t: number; passed: number; reason: string }[] };
 const age = (t: number) => { const h = (Date.now() - t) / 3600_000; return h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`; };
 

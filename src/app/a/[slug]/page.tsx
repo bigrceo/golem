@@ -17,7 +17,7 @@ type Resp = { agent: Agent; stats?: { count: number; hit: number; avg: number; e
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params; const d = await apiGet<Resp>(`/agents/${slug}`, 60);
-  return d ? { title: `@${d.agent.slug} · GOLEM`, description: d.agent.kind === "trench" ? describeTrench(d.agent.spec) : `A no-code agent trading ${d.agent.spec.market} in public.` } : {};
+  return d ? { title: `@${d.agent.slug} · golem`, description: d.agent.kind === "trench" ? describeTrench(d.agent.spec) : `A no-code agent trading ${d.agent.spec.market} in public.` } : {};
 }
 const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 const ago = (t: number) => { const m = (Date.now() - t) / 60000; return m < 60 ? `${Math.round(m)}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`; };

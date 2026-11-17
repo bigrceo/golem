@@ -22,11 +22,11 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
       const sp = Math.hypot(b.vx, b.vy); if (sp > 0.0058) { b.vx *= 0.0058 / sp; b.vy *= 0.0058 / sp; } if (sp < 0.0024) { b.vx *= 0.0024 / sp; b.vy *= 0.0024 / sp; }
       b.x += b.vx; b.y += b.vy; sx += b.x; sy += b.y;
     }
-    for (const b of B) { const s = dpr * (1.2 + 1.4 * Math.abs(Math.sin(b.x * 30 + t))); const g = 150 + ((b.y * 105) | 0); c.fillStyle = `rgb(${g},${g - 6},${g - 14})`; c.fillRect(ox + b.x * S, oy + b.y * S, s, s); }
+    for (const b of B) { const s = dpr * (1.2 + 1.4 * Math.abs(Math.sin(b.x * 30 + t))); const g = 150 + ((b.y * 105) | 0); c.fillStyle = `rgb(${g},${g - 6},${g - 14})`; c.beginPath(); c.arc(ox + b.x * S, oy + b.y * S, s / 2, 0, 6.2832); c.fill(); }
     const mx = ox + (sx / B.length) * S, my = oy + (sy / B.length) * S;
     c.strokeStyle = "#ff6a24"; c.lineWidth = 2 * dpr; c.beginPath(); c.ellipse(mx, my, S * 0.19, S * 0.17, t * 0.4, 0, Math.PI * 2); c.stroke();
     c.strokeStyle = "#f5f1e8"; c.lineWidth = dpr;
-    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([i, j], k) => { const X = mx + i * S * (0.2 + 0.015 * Math.sin(t * 2 + k)), Y = my + j * S * (0.18 + 0.015 * Math.cos(t * 2 + k)); c.strokeRect(X - 5 * dpr, Y - 5 * dpr, 10 * dpr, 10 * dpr); });
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([i, j], k) => { const X = mx + i * S * (0.2 + 0.015 * Math.sin(t * 2 + k)), Y = my + j * S * (0.18 + 0.015 * Math.cos(t * 2 + k)); c.beginPath(); c.moveTo(X - 6 * dpr * i, Y); c.lineTo(X, Y); c.lineTo(X, Y - 6 * dpr * j); c.stroke(); });
     c.fillStyle = "#d8d3c6"; c.font = `700 ${S * 0.06}px Sora, sans-serif`; c.textAlign = "center"; c.fillText(label, w / 2, oy + S + S * 0.07);
   });
   return <canvas ref={ref} className="w-full h-full" aria-hidden />;

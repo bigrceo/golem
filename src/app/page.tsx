@@ -150,7 +150,7 @@ export default async function Home() {
           <div className="mt-9"><HeroInput /></div>
         </div>
       </section>
-      <footer className="border-t border-[var(--line)]"><div className="mx-auto max-w-6xl px-5 py-8 flex flex-wrap justify-between gap-4 text-sm text-[var(--muted)]"><span className="flex items-center gap-2">GOLEM · Robinhood Chain</span><span>Paper trading on real prices. Calls are not advice.</span></div></footer>
+      <footer className="border-t border-[var(--line)]"><div className="mx-auto max-w-6xl px-5 py-8 flex flex-wrap justify-between gap-4 text-sm text-[var(--muted)]"><span className="flex items-center gap-2">golem · Robinhood Chain</span><span>Paper trading on real prices. Calls are not advice.</span></div></footer>
     </main>
   );
 }

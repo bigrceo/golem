@@ -11,7 +11,7 @@ const POS = ["left-0 top-10", "right-0 top-0", "left-[18%] top-[46%]"];
 function Badge({ a, n, fired }: { a: BadgeAgent; n: number; fired: boolean }) {
   return (
     <div className="card w-[260px] p-0 overflow-hidden relative">
-      <div className="h-9 bg-black flex items-center justify-between px-4"><span className="text-white text-xs font-bold tracking-[.16em]">GOLEM · AGENT</span><span className="w-10 h-2 rounded-full bg-[var(--bg2)]" /></div>
+      <div className="h-9 bg-black flex items-center justify-between px-4"><span className="text-white text-xs font-bold tracking-[.16em]">golem · AGENT</span><span className="w-10 h-2 rounded-full bg-[var(--bg2)]" /></div>
       <div className="p-4">
         <div className="flex items-center gap-3"><Avatar id={a.slug} name={a.slug} size={46} /><div className="min-w-0"><div className="font-bold truncate">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.role}</div></div></div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
