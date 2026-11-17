@@ -42,3 +42,10 @@ next-env.d.ts
 data/
 .env.local
 .env*.local
+.hire-api-secret
+contracts/lib
+contracts/out
+contracts/cache
+contracts/broadcast
+worker/node_modules
+worker/.wrangler

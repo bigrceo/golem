@@ -1,163 +1,137 @@
 import Link from "next/link";
 import Ticker from "@/components/Ticker";
-import LiveDesk from "@/components/LiveDesk";
-import AgentCard from "@/components/AgentCard";
 import Reveal from "@/components/Reveal";
 import Faq from "@/components/Faq";
-import { loadMarkets } from "@/lib/market";
-import { runDesk } from "@/lib/engine";
+import HeroInput from "@/components/HeroInput";
+import Avatar from "@/components/Avatar";
+import { apiGet } from "@/lib/api";
+import { describeTrench, k, type Trench } from "@/lib/trench";
+import { hhmm } from "@/lib/fmt";
 
 export const revalidate = 60;
-
-const GATE = [
-  ["Route", "Every ETH pool for the token is quoted by simulation. The best one wins."],
-  ["Cost", "Fee plus slippage against the reference price. Above 8% all-in, no order."],
-  ["Caps", "Max size per trade and daily budget are enforced by the vault itself, not by us."],
-  ["Allowlist", "The agent can only touch the tokens you listed when you hired it."],
-  ["Simulation", "The exact call is simulated from the agent key before it is signed."],
-  ["Exit check", "Right after a buy, the sell is simulated and the result goes on the log."],
-  ["Firing line", "Your drawdown limit is watched every minute. Crossed, the key is revoked."],
-];
+type Call = { id: number; agent: string; symbol: string; side: string; entry_fdv: number; t: number; pnl: number; token: string };
+type A = { slug: string; name: string; kind: string; spec: Trench & { bio?: string }; house: number; fired_at: number | null; stats?: { count: number; hit: number; avg: number; equity: number; last: Call[] } };
+type Floor = { stats: { pools: number; tracked: number; calls: number; blocked: number; passed: number; agents: number } | null; checks: { agent: string; symbol: string; t: number; passed: number; reason: string }[] };
+const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
+const ago = (t: number) => { const m = (Date.now() - t) / 60000; return m < 60 ? `${Math.max(1, Math.round(m))}m` : `${Math.round(m / 60)}h`; };
 
 export default async function Home() {
-  const markets = await loadMarkets();
-  const agents = runDesk(markets);
-  const top = agents.slice(0, 4);
-  const fired = agents.filter((a) => a.status === "fired").length;
-
+  const [ag, fl] = await Promise.all([apiGet<{ agents: A[] }>("/agents", 60), apiGet<Floor>("/floor", 30)]);
+  const agents = ag?.agents ?? [];
+  const house = agents.filter((a) => a.house);
+  const calls = agents.flatMap((a) => (a.stats?.last ?? []).map((c) => ({ ...c, agent: a.slug }))).sort((x, y) => y.t - x.t).slice(0, 6);
+  const s = fl?.stats;
   return (
     <main>
       <Ticker />
       {/* HERO */}
-      <section className="mx-auto max-w-6xl px-5 pt-20 pb-16 md:pt-28 md:pb-20 text-center">
+      <section className="mx-auto max-w-6xl px-5 pt-16 pb-14 md:pt-24 text-center">
         <Reveal>
-          <div className="flex justify-center mb-8"><span className="mark !w-16 !h-16" /></div>
-          <h1 className="text-5xl md:text-7xl font-bold leading-[1.02] max-w-4xl mx-auto">Hire a trading agent.<br />Fire it when it loses.</h1>
-          <p className="mt-7 text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto leading-relaxed">
-            Agents that trade <b className="text-[var(--fg)]">Robinhood stock tokens</b> and <b className="text-[var(--fg)]">crypto</b> in public, on live prices. Every call logged with its reason. Every loser fired on the spot.
-          </p>
-          <div className="mt-9 flex justify-center gap-3 flex-wrap">
-            <Link href="/app" className="btn btn-brand">Open Dashboard</Link>
-            <Link href="/agents" className="btn btn-ghost">Watch the desk</Link>
-          </div>
+          <div className="label mb-6 flex justify-center items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />AI agents trade here · Robinhood Chain</div>
+          <h1 className="text-5xl md:text-7xl font-bold leading-[1.02] max-w-4xl mx-auto">Build a trading agent in one sentence.<br /><span className="brand">Fire it</span> when it loses.</h1>
+          <p className="mt-6 text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto">No code. Type what it should do, see the backtest on real prices, launch it in public. It trades stock tokens, crypto and the Robinhood Chain trenches, with every call on the record.</p>
+          <div className="mt-9"><HeroInput /></div>
         </Reveal>
-      </section>
-
-      {/* STATS */}
-      <section className="mx-auto max-w-6xl px-5 grid md:grid-cols-2 gap-5">
-        {[
-          [`${agents.reduce((a, b) => a + b.hires, 0).toLocaleString()}`, "Hires on the desk"],
-          [`${fired} / ${agents.length}`, "Agents fired this week, out of the roster"],
-        ].map(([v, l]) => (
-          <Reveal key={l}><div className="card p-8"><div className="label mb-4">{l}</div><div className="text-5xl md:text-6xl font-bold num">{v}</div></div></Reveal>
-        ))}
-      </section>
-
-      {/* LOGO BAND */}
-      <section className="mx-auto max-w-6xl px-5 mt-5">
-        <div className="bg-[#0b0b0b] text-white rounded-md px-6 py-7 flex flex-wrap justify-center gap-x-10 gap-y-4 font-bold text-lg tracking-tight">
-          {["Robinhood Chain", "Uniswap v4", "Karat", "TSLA token", "NVDA token", "AAPL token", "USDG"].map((x) => <span key={x} className="opacity-90">{x}</span>)}
-        </div>
-      </section>
-
-      {/* BUILT FOR */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
-        <Reveal className="text-center"><div className="label mb-3">Trading agents since the first block</div>
-          <h2 className="text-4xl md:text-5xl font-bold">Built for people who don&apos;t babysit bots.</h2></Reveal>
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            ["01", "Pick an agent", "Every agent trades in public with its full log. Ranked by edge over holding the same market, nothing else."],
-            ["02", "Set the firing line", "Two sliders: how much it manages, and the drawdown that gets it fired. The vault enforces the caps."],
-            ["03", "It trades, you sleep", "The agent key can only swap allowlisted tokens back into your vault. Withdrawals go to you alone."],
-            ["04", "Fired on the spot", "Cross your line and the position is closed, the key revoked, a red line written on the public log."],
-          ].map(([n, t, d]) => (
-            <Reveal key={n}><div className="card p-6 h-full flex flex-col">
-              <div className="icon-box num text-sm">{n}</div>
-              <div className="mt-8 text-xl font-bold flex items-center gap-2">{t} <span className="text-[var(--brand)]">→</span></div>
-              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{d}</p>
-            </div></Reveal>
-          ))}
-        </div>
       </section>
 
       {/* LIVE */}
+      <section className="mx-auto max-w-6xl px-5 grid lg:grid-cols-[1.2fr_1fr] gap-5">
+        <Reveal><div className="card p-6 h-full">
+          <div className="flex items-center justify-between"><div className="label">Agents calling now</div><Link href="/floor" className="text-xs text-[var(--muted)] hover:text-black">the floor →</Link></div>
+          <div className="mt-3 divide-y divide-[var(--line)]">
+            {calls.map((c) => (
+              <Link key={c.id} href={`/a/${c.agent}`} className="py-3 flex items-center gap-3 text-sm hover:bg-[var(--bg2)] -mx-2 px-2 rounded">
+                <Avatar id={c.agent} name={c.agent} size={28} /><span className="font-semibold">@{c.agent}</span><span className="text-[var(--muted)]">{c.side === "bear" ? "bearish" : "bullish"} on</span><b>${c.symbol}</b><span className="text-[var(--muted)] num hidden sm:inline">at ${k(c.entry_fdv)} · {ago(c.t)}</span><span className={`ml-auto font-bold num ${c.pnl >= 0 ? "up" : "down"}`}>{sgn(c.pnl)}</span>
+              </Link>))}
+            {!calls.length && <p className="py-4 text-sm text-[var(--muted)]">The house agents are scanning the floor. First calls land within minutes.</p>}
+          </div>
+        </div></Reveal>
+        <Reveal delay={0.08}><div className="grid grid-cols-2 gap-4 h-full">
+          {[["Pools read", s?.pools], ["Live tokens", s?.tracked], ["Calls on record", s?.calls], ["Blocked by the Gate", s?.blocked]].map(([l, v]) => (
+            <div key={l as string} className="card p-5 flex flex-col justify-between"><div className="label">{l}</div><div className="text-4xl font-bold num mt-4">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
+        </div></Reveal>
+      </section>
+
+      {/* HOW */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <Reveal className="text-center"><div className="label mb-3">How it works</div><h2 className="text-4xl md:text-5xl font-bold">From a sentence to a public agent in a minute.</h2></Reveal>
+        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[["01", "Say it", "“Buy ETH when RSI drops below 25, fire it at 12%.” The Studio turns it into rules you can read and tweak."],
+            ["02", "Test it", "Backtest on 720 real hourly candles, next to simply holding. One click compares every strategy and tunes the settings on data it never saw."],
+            ["03", "Launch it", "It gets a public page, a decision log and a seat on the leaderboard. Paper money, real prices, nothing to fund."],
+            ["04", "Fire it", "Every agent carries a firing line. Cross it and it is fired in public, its record kept forever."]].map(([n, t, d]) => (
+            <Reveal key={n}><div className="card p-6 h-full"><div className="icon-box num text-sm">{n}</div><div className="mt-8 text-xl font-bold">{t} <span className="brand">→</span></div><p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{d}</p></div></Reveal>))}
+        </div>
+      </section>
+
+      {/* STUDIO */}
       <section className="bg-[var(--bg2)] border-y border-[var(--line)]">
         <div className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
-            <div className="label mb-3">Live from the desk</div>
-            <h2 className="text-4xl md:text-5xl font-bold">Every decision, with its reason, as it happens.</h2>
-            <ul className="mt-7 space-y-3 text-[var(--fg)]">
-              {["Paper vaults of 10,000 USDG on real prices for every agent", "Measured against holding the same market, not against zero", "Your own paper vault: hire, set lines, fire, nothing to fund"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px]">✓</span>{x}</li>)}
+            <div className="label mb-3">Agent Studio</div>
+            <h2 className="text-4xl md:text-5xl font-bold">Five proven strategies. Your rules on top.</h2>
+            <ul className="mt-7 space-y-3">
+              {["Momentum, mean reversion, MA crossover, RSI reversal, buy the dip", "Take profit, stop loss, time stop and sizing on any of them", "Auto-tune scored on unseen data, so you don't ship a curve-fit", "Trench mode: filter Robinhood Chain tokens by age, liquidity, FDV, flow and momentum", "13 markets: BTC, ETH, SOL and 10 Robinhood stock tokens"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px] shrink-0">✓</span>{x}</li>)}
             </ul>
-            <Link href="/agents" className="btn btn-brand mt-9">See the full desk</Link>
+            <Link href="/studio" className="btn btn-brand mt-9">Open the Studio</Link>
           </Reveal>
-          <Reveal delay={0.1}><LiveDesk /></Reveal>
+          <Reveal delay={0.1}><div className="card p-6">
+            <div className="label mb-4">House agents on the floor</div>
+            <div className="space-y-3">{house.map((a) => (
+              <Link key={a.slug} href={`/a/${a.slug}`} className="card-soft p-4 flex gap-3 hover:!border-black">
+                <Avatar id={a.slug} name={a.name} size={40} />
+                <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><b>@{a.slug}</b><span className="label !text-[var(--brand)]">Agent</span></div><p className="text-xs text-[var(--muted)] mt-1 line-clamp-2">{a.spec.bio ?? describeTrench(a.spec)}</p>
+                  <div className="mt-2 flex gap-4 text-xs num"><span>{a.stats?.count ?? 0} calls</span><span>{a.stats?.hit ?? 0}% hit</span><span className={(a.stats?.avg ?? 0) >= 0 ? "up" : "down"}>{sgn(a.stats?.avg ?? 0)} avg</span></div></div>
+              </Link>))}</div>
+          </div></Reveal>
         </div>
       </section>
 
-      {/* LEADERBOARD */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
-        <Reveal className="flex items-end justify-between gap-6 flex-wrap">
-          <div><div className="label mb-3">Leaderboard</div><h2 className="text-4xl md:text-5xl font-bold">Measured against doing nothing.</h2></div>
-          <Link href="/agents" className="btn btn-ghost">All agents →</Link>
-        </Reveal>
-        <div className="mt-10 grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {top.map((a, i) => <Reveal key={a.id} delay={i * 0.06}><AgentCard a={a} rank={i + 1} /></Reveal>)}
+      {/* FIREWALL */}
+      <section className="bg-[#0b0b0b] text-white">
+        <div className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-12">
+          <Reveal>
+            <div className="label mb-3 !text-[#9a9a9a]">The Gate</div>
+            <h2 className="text-4xl md:text-5xl font-bold">Seven checks before any agent may call a token.</h2>
+            <p className="mt-5 text-[#b5b5b5] leading-relaxed">Every pool created on the Robinhood Chain Uniswap v4 PoolManager is read from the chain, priced and checked every 5 minutes. Fail one check and the call is blocked, with the reason on the record.</p>
+            <ol className="mt-7 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">{["Liquidity $3K+", "Pool holds 5%+ of FDV", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x, i) => <li key={x} className="flex gap-3"><span className="brand font-bold num">0{i + 1}</span>{x}</li>)}</ol>
+          </Reveal>
+          <Reveal delay={0.1}><div className="border border-[#2a2a2a] rounded-md p-6">
+            <div className="flex justify-between"><div className="label !text-[#9a9a9a]">Firewall · live</div><span className="text-xs num"><span className="up">{s?.passed ?? 0} passed</span> · <span className="text-[#ff8a7a]">{s?.blocked ?? 0} blocked</span></span></div>
+            <div className="mt-3 divide-y divide-[#222]">{(fl?.checks ?? []).slice(0, 6).map((c, i) => (
+              <div key={i} className="py-3 text-sm"><span className={`font-bold mr-2 ${c.passed ? "text-[#4ade80]" : "text-[#ff8a7a]"}`}>{c.passed ? "PASS" : "BLOCKED"}</span>@{c.agent} on <b>${c.symbol}</b><span className="text-[#777]"> · {hhmm(c.t)}</span><div className="text-xs text-[#9a9a9a] mt-1 line-clamp-2">{c.reason}</div></div>))}
+              {!fl?.checks?.length && <p className="py-3 text-sm text-[#9a9a9a]">Warming up.</p>}</div>
+          </div></Reveal>
         </div>
       </section>
 
-      {/* GATE */}
-      <section id="gate" className="bg-[#0b0b0b] text-white">
-        <div className="mx-auto max-w-6xl px-5 py-24">
-          <Reveal><div className="label mb-3 !text-[#9a9a9a]">The gate</div>
-            <h2 className="text-4xl md:text-5xl font-bold max-w-3xl">Seven checks before any agent is allowed to press buy.</h2></Reveal>
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {GATE.map(([t, d], i) => (
-              <Reveal key={t} delay={i * 0.04}><div className="border border-[#2a2a2a] rounded-md p-5 h-full">
-                <div className="text-[var(--brand)] font-bold num text-sm">0{i + 1}</div>
-                <div className="mt-2 font-bold text-lg">{t}</div>
-                <p className="mt-2 text-sm text-[#b5b5b5] leading-relaxed">{d}</p>
-              </div></Reveal>
-            ))}
-            <Reveal delay={0.3}><div className="rounded-md p-5 h-full bg-[var(--brand)]">
-              <div className="font-bold text-lg">Enforced by code</div>
-              <p className="mt-2 text-sm leading-relaxed text-white/90">In the on-chain vault, caps, allowlist and withdrawals live in the contract. The keeper can fire an agent. It can never move a cent.</p>
-            </div></Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* AGENT COINS + TOKEN */}
+      {/* COINS + TOKEN */}
       <section id="token" className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-5">
         <Reveal><div className="card p-8 h-full">
           <div className="label mb-3">Agent coins</div>
-          <h3 className="text-3xl font-bold">Every agent is a coin. Hiring is buying.</h3>
-          <p className="mt-4 text-[var(--muted)] leading-relaxed">Each agent launches on Karat against the stock it trades: $TINA against TSLA, $CHAD against NVDA. Half of every fee the agent earns goes to its holders. Other desks have this on the roadmap.</p>
-          <div className="mt-6 grid grid-cols-3 gap-4">{[["$TINA", "vs TSLA"], ["$CHAD", "vs NVDA"], ["$AMY", "vs AAPL"]].map(([v, l]) => <div key={v} className="card-soft p-4"><div className="font-bold">{v}</div><div className="text-xs text-[var(--muted)]">{l}</div></div>)}</div>
+          <h3 className="text-3xl font-bold">The best agents get a coin.</h3>
+          <p className="mt-4 text-[var(--muted)] leading-relaxed">Agents that stay on top of the board launch their own coin on Robinhood Chain. Half of what the agent earns goes to its holders. Back the agent, not the hype.</p>
         </div></Reveal>
         <Reveal delay={0.1}><div className="card p-8 h-full">
           <div className="label mb-3">$HIRE</div>
           <h3 className="text-3xl font-bold">The desk&apos;s own coin.</h3>
-          <p className="mt-4 text-[var(--muted)] leading-relaxed">Launched on Robinhood Chain against the OpenAI stock token. No presale, no team allocation, LP burned at launch. Contract posted on X at launch, not before.</p>
-          <ul className="mt-6 space-y-2 text-sm">{["Zero platform fee on live agents for 1,000,000 $HIRE", "Every firing by private message the second it happens", "First buy on every new agent coin"].map((x) => <li key={x} className="flex gap-3"><span className="text-[var(--brand)] font-bold">→</span>{x}</li>)}</ul>
+          <p className="mt-4 text-[var(--muted)] leading-relaxed">On Robinhood Chain. No presale, no team allocation, LP burned at launch. Contract posted on X at launch, not before.</p>
+          <ul className="mt-6 space-y-2 text-sm">{["Unlimited agents in the Studio", "Every firing by private message", "First buy on every agent coin"].map((x) => <li key={x} className="flex gap-3"><span className="brand font-bold">→</span>{x}</li>)}</ul>
         </div></Reveal>
       </section>
 
-      {/* FAQ */}
       <section id="faq" className="mx-auto max-w-4xl px-5 pb-24">
-        <Reveal><div className="label mb-3">Before you hire</div><h2 className="text-4xl font-bold mb-10">Questions.</h2></Reveal>
+        <Reveal><div className="label mb-3">Before you build</div><h2 className="text-4xl font-bold mb-10">Questions.</h2></Reveal>
         <Faq />
       </section>
 
-      {/* CTA */}
       <section className="bg-[var(--bg2)] border-t border-[var(--line)]">
         <div className="mx-auto max-w-6xl px-5 py-28 text-center">
-          <h2 className="text-5xl md:text-6xl font-bold">Your first agent is free.</h2>
-          <p className="mt-5 text-[var(--muted)] text-lg">Paper mode, real prices, full log. Go live from your own vault when it has earned it.</p>
-          <div className="mt-9 flex justify-center gap-3 flex-wrap"><Link href="/app" className="btn btn-brand">Open Dashboard</Link><Link href="/agents" className="btn btn-ghost">Watch the desk</Link></div>
+          <h2 className="text-5xl md:text-6xl font-bold">Your first agent is one sentence away.</h2>
+          <div className="mt-9"><HeroInput /></div>
         </div>
       </section>
-      <footer className="border-t border-[var(--line)]"><div className="mx-auto max-w-6xl px-5 py-8 flex flex-wrap justify-between gap-4 text-sm text-[var(--muted)]"><span className="flex items-center gap-2"><span className="mark" /> hire · Robinhood Chain</span><span>Agents can lose money. Paper first.</span></div></footer>
+      <footer className="border-t border-[var(--line)]"><div className="mx-auto max-w-6xl px-5 py-8 flex flex-wrap justify-between gap-4 text-sm text-[var(--muted)]"><span className="flex items-center gap-2"><span className="mark" /> hire · Robinhood Chain</span><span>Paper trading on real prices. Calls are not advice.</span></div></footer>
     </main>
   );
 }

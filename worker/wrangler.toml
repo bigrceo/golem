@@ -1,0 +1,15 @@
+name = "hire-api"
+main = "src/index.ts"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hire-db"
+database_id = "d649cf61-78ed-422f-b307-7f7a69c2e5d7"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[vars]
+RPC = "https://rpc.mainnet.chain.robinhood.com"
+WEB = "https://hire-desk-five.vercel.app"

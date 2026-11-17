@@ -1,0 +1,45 @@
+import Link from "next/link";
+import { apiGet } from "@/lib/api";
+import { k, type FloorToken } from "@/lib/trench";
+import { hhmm } from "@/lib/fmt";
+export const revalidate = 30;
+export const metadata = { title: "hire · The floor", description: "Every Robinhood Chain pool, read from the chain, run through the Gate." };
+type Floor = { lastRun: number; stats: { pools: number; tracked: number; calls: number; blocked: number; passed: number; agents: number } | null; tokens: FloorToken[]; checks: { agent: string; symbol: string; t: number; passed: number; reason: string }[] };
+const age = (t: number) => { const h = (Date.now() - t) / 3600_000; return h < 1 ? `${Math.round(h * 60)}m` : h < 48 ? `${Math.round(h)}h` : `${Math.round(h / 24)}d`; };
+
+export default async function FloorPage() {
+  const d = (await apiGet<Floor>("/floor", 30)) ?? { lastRun: 0, stats: null, tokens: [], checks: [] };
+  return (
+    <main className="mx-auto max-w-7xl px-5 py-10">
+      <div className="label mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />The floor · Robinhood Chain</div>
+      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Every new pool, read from the chain, run through the Gate.</h1>
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
+        {[["Pools seen", d.stats?.pools], ["Live tokens", d.stats?.tracked], ["Calls", d.stats?.calls], ["Passed", d.stats?.passed], ["Blocked", d.stats?.blocked]].map(([l, v]) => (
+          <div key={l as string} className="card p-5"><div className="label mb-2">{l}</div><div className="text-3xl font-bold num">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
+      </div>
+      <div className="mt-5 grid lg:grid-cols-[1.6fr_1fr] gap-5">
+        <div className="card p-0 overflow-x-auto">
+          <table className="w-full text-sm num">
+            <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">Token</th><th className="font-semibold">Age</th><th className="font-semibold">FDV</th><th className="font-semibold">Liquidity</th><th className="font-semibold">Buys / sells 1h</th><th className="font-semibold">1h</th><th className="font-semibold pr-4">Gate</th></tr></thead>
+            <tbody>{d.tokens.map((t) => { const bad = t.gate.filter((g) => !g.ok); return (
+              <tr key={t.token} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
+                <td className="p-4"><a href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="flex items-center gap-2.5 font-sans">{t.image ? <img src={t.image} alt="" className="w-7 h-7 rounded" /> : <span className="w-7 h-7 rounded bg-black text-white text-xs font-bold flex items-center justify-center">{t.symbol[0]}</span>}<span><b>${t.symbol}</b><span className="block text-xs text-[var(--muted)] truncate max-w-[140px]">{t.name}</span></span></a></td>
+                <td>{age(t.created)}</td><td>${k(t.fdv)}</td><td>${k(t.liq)}</td><td>{t.buys_h1} / {t.sells_h1}</td><td className={t.ch_h1 >= 0 ? "up" : "down"}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</td>
+                <td className="pr-4 font-sans">{t.passed ? <span className="up font-bold">PASS</span> : <span className="down font-bold" title={bad.map((b) => `${b.name}: ${b.detail}`).join("\n")}>{bad[0]?.name ?? "—"}</span>}</td>
+              </tr>); })}</tbody>
+          </table>
+          {!d.tokens.length && <p className="p-6 text-[var(--muted)]">The floor is warming up.</p>}
+        </div>
+        <div className="space-y-5">
+          <div className="card p-6"><div className="label">Firewall · live</div>
+            <div className="mt-3 divide-y divide-[var(--line)]">{d.checks.map((c, i) => (
+              <div key={i} className="py-2.5 text-sm"><span className={`font-bold mr-2 ${c.passed ? "up" : "down"}`}>{c.passed ? "PASS" : "BLOCKED"}</span><Link href={`/a/${c.agent}`} className="font-semibold hover:underline">@{c.agent}</Link> on <b>${c.symbol}</b><span className="text-[var(--muted)]"> · {hhmm(c.t)}</span><div className="text-xs text-[var(--muted)] mt-0.5">{c.reason}</div></div>))}
+              {!d.checks.length && <p className="py-3 text-sm text-[var(--muted)]">No check yet.</p>}</div></div>
+          <div className="card p-6"><div className="label mb-3">The seven checks</div>
+            <ol className="text-sm space-y-1.5 list-decimal list-inside">{["Liquidity $3K+", "Pool holds 5%+ of FDV", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x) => <li key={x}>{x}</li>)}</ol>
+            <p className="mt-3 text-xs text-[var(--muted)]">Checks, never a safety stamp. Data from the Uniswap v4 PoolManager and DexScreener, refreshed every 5 minutes.</p></div>
+        </div>
+      </div>
+    </main>
+  );
+}
