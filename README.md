@@ -1,6 +1,6 @@
 <p align="center"><img src="public/brand/pfp.svg" width="72" alt="GOLEM"></p>
 <h1 align="center">GOLEM</h1>
-<p align="center"><b>Build an agent in one sentence. Fire it when it loses.</b><br>In the legend, a golem comes alive from one word written on its brow. Here, a trading agent comes alive from one sentence.<br>
+<p align="center"><b>Build an agent in one sentence. Watch it trade in public.</b><br>In the legend, a golem comes alive from one word written on its brow. Here, a trading agent comes alive from one sentence.<br>
 No-code trading agents on Robinhood Chain: stock tokens, crypto and the trenches, every call on the record.<br>
 <a href="https://hire-desk-five.vercel.app">Open the app</a> · <a href="https://hire-desk-five.vercel.app/studio">Agent Studio</a> · <a href="https://hire-desk-five.vercel.app/floor">The floor</a> · <a href="https://hire-desk-five.vercel.app/agents">Leaderboard</a></p>
 

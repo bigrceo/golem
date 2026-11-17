@@ -1,0 +1,93 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:S;src:url(Sora-800.ttf);font-weight:800}@font-face{font-family:S;src:url(Sora-600.ttf);font-weight:600}@font-face{font-family:S;src:url(Sora-400.ttf);font-weight:400}
+*{margin:0;box-sizing:border-box}html,body{width:1920px;height:1080px;overflow:hidden;background:#0b0c0b;font-family:S,sans-serif;color:#ece9e0}
+.layer{position:absolute;inset:0}
+#glow{background:radial-gradient(900px 600px at 78% 0%,rgba(255,106,36,.22),transparent 60%),radial-gradient(800px 500px at 10% 100%,rgba(255,106,36,.10),transparent 60%)}
+.k{position:absolute;left:0;right:0;text-align:center;font-weight:800;letter-spacing:-.04em;line-height:1}
+.o{color:#ff6a24}
+.panel{position:absolute;border-radius:22px;overflow:hidden;box-shadow:0 60px 120px -30px rgba(0,0,0,.9),0 0 0 1px rgba(236,233,224,.12)}
+.panel img{display:block;width:100%}
+#flash{background:#ff6a24;mix-blend-mode:screen;pointer-events:none}
+#type{position:absolute;left:50%;transform:translateX(-50%);top:160px;width:1240px;padding:26px 34px;border-radius:20px;background:#121412;box-shadow:0 0 0 1px rgba(236,233,224,.14),0 40px 80px -30px #000;font-size:38px;font-weight:600;display:flex;align-items:center;gap:20px}
+#type .btn{margin-left:auto;background:#ff6a24;color:#0b0c0b;border-radius:14px;padding:14px 26px;font-size:28px;font-weight:800}
+.caret{display:inline-block;width:3px;height:42px;background:#ff6a24;vertical-align:middle;margin-left:4px}
+#stamp{position:absolute;border:8px solid #ff5a3d;color:#ff5a3d;font-weight:800;font-size:120px;letter-spacing:.1em;padding:6px 40px;border-radius:20px;left:50%;top:50%}
+.badge{position:absolute;width:520px;border-radius:26px;background:#141614;box-shadow:0 0 0 1px rgba(236,233,224,.12),0 50px 100px -30px #000;overflow:hidden}
+.badge .h{background:#000;color:#fff;font-weight:800;letter-spacing:.16em;font-size:22px;padding:20px 28px}
+.badge .b{padding:30px 28px;display:flex;gap:22px;align-items:center}
+.av{width:96px;height:96px;border-radius:16px;background:#1a1d1a;display:grid;place-items:center;font-size:44px;font-weight:800}
+.stat{display:flex;gap:16px;padding:0 28px 30px}.stat div{flex:1;background:rgba(236,233,224,.05);border-radius:16px;padding:18px;text-align:center;font-size:34px;font-weight:800}.stat small{display:block;font-size:16px;color:#8f8c83;letter-spacing:.12em;font-weight:600;margin-top:6px}
+.chip{position:absolute;padding:16px 26px;border-radius:16px;background:#141614;box-shadow:0 0 0 1px rgba(255,106,36,.4),0 30px 60px -20px #000;font-weight:800;font-size:34px}
+</style></head><body>
+<div id="glow" class="layer"></div>
+<canvas id="cv" class="layer" width="1920" height="1080"></canvas>
+<div id="stage" class="layer"></div>
+<div id="flash" class="layer" style="opacity:0"></div>
+<script>
+const W=1920,H=1080,FPS=30,DUR=26.5;
+const HITS=[0.5,4.5,8.5,12.5,14.5,16.5,20.5,24.5];
+const $=s=>document.querySelector(s), st=$('#stage'), cv=$('#cv'), c=cv.getContext('2d');
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), lin=(t,a,b)=>cl((t-a)/(b-a)), eo=x=>1-Math.pow(1-x,3), eb=x=>{const c1=1.7,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)}, ei=x=>x*x*x;
+let seed=7; const rnd=()=>((seed=(seed*16807)%2147483647)/2147483647);
+// embers
+const E=Array.from({length:70},()=>({x:rnd()*W,y:rnd()*H,v:20+rnd()*45,r:1.5+rnd()*3,p:rnd()*6}));
+// orb points + edges
+const N=700,P=[];for(let i=0;i<N;i++){const y=rnd()*2-1,r=Math.sqrt(1-y*y),th=rnd()*6.283,k=1.8+rnd()*1.4;P.push([Math.cos(th)*r,y,Math.sin(th)*r,k])}
+const ED=[];for(let i=0;i<N;i++){let b1=[9,0],b2=[9,0];for(let j=0;j<N;j++){if(i==j)continue;const d=(P[i][0]-P[j][0])**2+(P[i][1]-P[j][1])**2+(P[i][2]-P[j][2])**2;if(d<b1[0]){b2=b1;b1=[d,j]}else if(d<b2[0])b2=[d,j]}if(b1[1]>i)ED.push([i,b1[1]]);if(b2[1]>i)ED.push([i,b2[1]])}
+// burst particles for the firing
+const BU=Array.from({length:160},()=>({a:rnd()*6.283,s:250+rnd()*900,r:2+rnd()*4,l:0.6+rnd()*1.2}));
+function orb(t,cx,cy,R,alpha,assemble){const k=eo(cl(assemble)),ry=t*.35,rx=.35,cY=Math.cos(ry),sY=Math.sin(ry),cX=Math.cos(rx),sX=Math.sin(rx);
+ const pr=P.map(p=>{const n=1+.06*Math.sin(p[0]*4+t*1.7);const x=p[0]*n*(k+(1-k)*p[3]),y=p[1]*n*(k+(1-k)*p[3]),z=p[2]*n*(k+(1-k)*p[3]);const X=x*cY-z*sY;let Z=x*sY+z*cY;const Y=y*cX-Z*sX;Z=y*sX+Z*cX;const s=2.6/(2.6+Z);return[cx+X*R*s,cy+Y*R*s,Z]});
+ c.lineWidth=1;for(const[a,b]of ED){const A=pr[a],B=pr[b];c.strokeStyle=`rgba(236,233,224,${(.05+(1-(A[2]+B[2])/2)*.2)*alpha*k})`;c.beginPath();c.moveTo(A[0],A[1]);c.lineTo(B[0],B[1]);c.stroke()}
+ for(const[x,y,z]of pr){c.fillStyle=`rgba(236,233,224,${(.25+(1-z)*.45)*alpha*k})`;c.beginPath();c.arc(x,y,1.4,0,6.283);c.fill()}
+ for(let i=0;i<pr.length;i+=61){const[x,y,z]=pr[i];if(z>.2)continue;const g=c.createRadialGradient(x,y,0,x,y,14);g.addColorStop(0,`rgba(255,106,36,${.9*alpha*k})`);g.addColorStop(1,'rgba(255,106,36,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,14,0,6.283);c.fill()}}
+const LOGO=(s,hd=1,bd=1,eye=1,core=1)=>`<svg width="${s}" height="${s}" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#ff6a24"/><rect x="22" y="${10.5-40*(1-hd)}" width="20" height="15.5" rx="5.5" fill="#0b0c0b"/><rect x="14.5" y="${29+40*(1-bd)}" width="35" height="24.5" rx="7.5" fill="#0b0c0b"/><circle cx="32" cy="${18.2-40*(1-hd)}" r="${3.4*eye}" fill="#ff6a24"/><rect x="24.5" y="${38.5+40*(1-bd)}" width="15" height="3.4" rx="1.7" fill="#ff6a24" opacity="${core}"/></svg>`;
+const SENT='buy ETH when RSI drops below 25, fire it at 12%';
+function render(t){
+ c.clearRect(0,0,W,H);
+ // embers always
+ for(const e of E){const y=((e.y-e.v*t)%H+H)%H,x=e.x+Math.sin(t*.8+e.p)*14,a=.35+.25*Math.sin(t*2+e.p);const g=c.createRadialGradient(x,y,0,x,y,e.r*5);g.addColorStop(0,`rgba(255,150,70,${a})`);g.addColorStop(1,'rgba(255,106,36,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,e.r*5,0,6.283);c.fill()}
+ let html='';
+ // flash on hits
+ let fl=0;for(const h of HITS){const d=t-h;if(d>=0&&d<.35)fl=Math.max(fl,(1-d/.35)*.32)}$('#flash').style.opacity=fl;
+ // ---- S1 intro 0-4.5: orb assembles, logo stacks, eye lights at 0.5
+ if(t<4.6){const out=lin(t,4.1,4.6);orb(t,W/2,H/2-30,360,1-out,lin(t,0,2.2));
+  const hd=eb(lin(t,.15,.75)),bd=eb(lin(t,0,.6)),eye=lin(t,.5,.7),z=1-out*.4;
+  html+=`<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-58%) scale(${(.6+.4*eo(lin(t,0,.6)))*z});opacity:${1-out}">${LOGO(260,hd,bd,eye,lin(t,1,1.3))}</div>`;
+  html+=`<div class="k" style="top:760px;font-size:96px;opacity:${eo(lin(t,1.6,2.1))*(1-out)};transform:translateY(${30*(1-eo(lin(t,1.6,2.1)))}px)">meet <span class="o">golem</span></div>`;}
+ // ---- S2 4.5-8.5: kinetic type
+ if(t>=4.4&&t<8.6){const a=eb(lin(t,4.5,4.85)),b=eb(lin(t,5.6,5.95)),c2=eb(lin(t,6.7,7.05)),out=lin(t,8.2,8.6);
+  html+=`<div class="k" style="top:300px;font-size:150px;opacity:${a*(1-out)};transform:scale(${1.4-.4*a})">build a trading agent</div>`;
+  html+=`<div class="k" style="top:480px;font-size:150px;opacity:${b*(1-out)};transform:scale(${1.4-.4*b})">in <span class="o">one sentence.</span></div>`;
+  html+=`<div class="k" style="top:690px;font-size:46px;font-weight:600;color:#8f8c83;opacity:${c2*(1-out)}">no code. no wallet. nothing to fund.</div>`}
+ // ---- S3 8.5-12.5: typing the sentence over the studio
+ if(t>=8.4&&t<12.6){const inn=eo(lin(t,8.5,9.1)),out=lin(t,12.2,12.6),n=Math.floor(SENT.length*lin(t,9,10.9)),rot=12*(1-inn)-4*lin(t,9,12.5);
+  html+=`<div class="panel" style="left:260px;top:330px;width:1400px;opacity:${inn*(1-out)*.95};transform:perspective(2000px) rotateX(${14-6*inn}deg) rotateY(${rot}deg) translateY(${60*(1-inn)}px) scale(${.9+.1*inn})"><img src="studio2.png"></div>`;
+  html+=`<div id="type" style="opacity:${inn*(1-out)}"><span>${SENT.slice(0,n)}<span class="caret" style="opacity:${Math.floor(t*3)%2?1:.2}"></span></span><span class="btn" style="transform:scale(${1+.15*Math.max(0,1-Math.abs(t-11.1)*6)})">Build it</span></div>`;
+  const ok=eb(lin(t,11.2,11.55));html+=`<div class="chip" style="right:220px;top:300px;transform:scale(${ok});opacity:${ok*(1-out)}"><span class="o">●</span> agent built · backtested on 720 real candles</div>`}
+ // ---- S4 12.5-14.5: backtest punch
+ if(t>=12.4&&t<14.6){const inn=eo(lin(t,12.5,12.9)),out=lin(t,14.2,14.6),z=1.05+.25*lin(t,12.5,14.5);
+  html+=`<div class="panel" style="left:50%;top:50%;width:1500px;transform:translate(-50%,-50%) scale(${z}) perspective(1800px) rotateY(${-8+8*inn}deg);opacity:${inn*(1-out)}"><img src="studio2.png" style="width:2900px;margin-left:-1400px;margin-top:-200px"></div>`;
+  html+=`<div style="position:absolute;left:0;right:0;top:0;height:300px;background:linear-gradient(#0b0c0b 55%,transparent);opacity:${1-out}"></div><div class="k" style="top:90px;font-size:110px;opacity:${eb(lin(t,12.6,12.9))*(1-out)}"><span class="o">+13%</span> vs holding BTC</div>`}
+ // ---- S5 14.5-20.5: the floor, the gate
+ if(t>=14.4&&t<20.6){const inn=eo(lin(t,14.5,14.95)),out=lin(t,20.2,20.6),scroll=lin(t,14.5,20.5)*260;
+  html+=`<div class="panel" style="left:620px;top:120px;width:1220px;height:840px;opacity:${inn*(1-out)};transform:perspective(2200px) rotateY(${-16+4*lin(t,14.5,20.5)}deg) rotateX(6deg) translateX(${80*(1-inn)}px)"><img src="floor2.png" style="width:1700px;margin-left:-120px;margin-top:${-140-scroll}px"></div>`;
+  const a=eb(lin(t,14.6,14.95)),b=eb(lin(t,16.5,16.85));
+  html+=`<div style="position:absolute;left:110px;top:230px;width:640px;opacity:${1-out}"><div style="font-size:26px;letter-spacing:.18em;color:#ff6a24;font-weight:800;opacity:${a}">THE GATE</div><div style="font-size:92px;font-weight:800;letter-spacing:-.04em;line-height:1.02;margin-top:18px;opacity:${a};transform:translateY(${30*(1-a)}px)">7 checks<br>before every<br><span class="o">call.</span></div>
+  <div style="margin-top:40px;font-size:30px;font-weight:600;color:#c8c5bd;opacity:${b};transform:translateY(${20*(1-b)}px)">every new pool on robinhood chain,<br>read straight from the chain.<br>every call public, with a receipt.</div></div>`}
+ // ---- S6 20.5-24.5: FIRED
+ if(t>=20.4&&t<24.6){const inn=eo(lin(t,20.5,20.8)),out=lin(t,24.2,24.6),hit=21.6,sl=eb(lin(t,hit,hit+.25)),burn=lin(t,22.4,23.4);
+  html+=`<div class="badge" style="left:50%;top:44%;transform:translate(-50%,-50%) rotate(-3deg) scale(${(.9+.1*inn)*(1-.06*burn)}) translateY(${-30*burn}px);opacity:${inn*(1-burn*.9)*(1-out)};filter:sepia(${burn}) saturate(${1+2*burn})">
+   <div class="h">GOLEM · AGENT</div><div class="b"><div class="av">b</div><div><div style="font-size:42px;font-weight:800">@btc-breakout</div><div style="font-size:24px;color:#8f8c83">BTC · 24h breakout</div></div></div>
+   <div class="stat"><div class="down" style="color:#ff5a3d">-10.6%<small>FROM PEAK</small></div><div>10%<small>FIRING LINE</small></div></div>
+   <div id="stamp" style="transform:translate(-50%,-50%) rotate(-14deg) scale(${3-2*sl});opacity:${sl*.95}">FIRED</div></div>`;
+  if(t>=hit+.15){const d=t-hit-.15;for(const p of BU){if(d>p.l)continue;const x=W/2+Math.cos(p.a)*p.s*d,y=H*.44+Math.sin(p.a)*p.s*d+260*d*d,a=1-d/p.l;const g=c.createRadialGradient(x,y,0,x,y,p.r*4);g.addColorStop(0,`rgba(255,170,80,${a})`);g.addColorStop(1,'rgba(255,106,36,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,p.r*4,0,6.283);c.fill()}}
+  const tx=eb(lin(t,22.6,22.95));html+=`<div class="k" style="top:840px;font-size:104px;opacity:${tx*(1-out)};transform:scale(${1.3-.3*tx})"><span class="o">fire it</span> when it loses.</div>`}
+ // ---- S7 24.5-26.5: end card
+ if(t>=24.4){const inn=eb(lin(t,24.5,24.9)),fade=lin(t,26,26.5);orb(t,W/2,H/2-40,300,.55*inn*(1-fade),1);
+  html+=`<div style="position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(${.7+.3*inn});opacity:${inn*(1-fade)}">${LOGO(200)}</div>`;
+  html+=`<div class="k" style="top:640px;font-size:112px;opacity:${inn*(1-fade)}">golem</div><div class="k" style="top:790px;font-size:46px;font-weight:600;color:#ff6a24;opacity:${eo(lin(t,25,25.4))*(1-fade)}">build yours · getgolem.xyz</div>`}
+ st.innerHTML=html;
+}
+window.render=render; render(0);
+</script></body></html>

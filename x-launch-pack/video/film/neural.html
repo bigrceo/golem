@@ -1,0 +1,112 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:S;src:url(Sora-800.ttf);font-weight:800}@font-face{font-family:S;src:url(Sora-600.ttf);font-weight:600}@font-face{font-family:S;src:url(Sora-400.ttf);font-weight:400}
+*{margin:0}html,body{width:1920px;height:1080px;overflow:hidden;background:#070807}canvas{position:absolute;inset:0}
+</style></head><body><canvas id="cv" width="1920" height="1080"></canvas><script>
+const W=1920,H=1080,c=document.getElementById('cv').getContext('2d');
+const OR='255,106,36',IV='236,233,224',RED='255,72,48';
+const cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),lin=(t,a,b)=>cl((t-a)/(b-a)),eo=x=>1-Math.pow(1-x,3),eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,eb=x=>{const k=1.7;return 1+(k+1)*Math.pow(x-1,3)+k*Math.pow(x-1,2)};
+let sd=11;const rnd=()=>((sd=(sd*16807)%2147483647)/2147483647);
+const HITS=[0.5,4.5,8.5,12.5,14.5,16.5,20.5,24.5];
+const SENT='buy ETH when RSI drops below 25. fire it at 12%.';
+// ---------- shared particles: sentence glyph points -> orb points
+const ORB=[];for(let i=0;i<900;i++){const y=rnd()*2-1,r=Math.sqrt(1-y*y),th=rnd()*6.283;ORB.push([Math.cos(th)*r,y,Math.sin(th)*r])}
+const OE=[];for(let i=0;i<ORB.length;i++){let b=[[9,0],[9,0]];for(let j=0;j<ORB.length;j++){if(i==j)continue;const d=(ORB[i][0]-ORB[j][0])**2+(ORB[i][1]-ORB[j][1])**2+(ORB[i][2]-ORB[j][2])**2;if(d<b[0][0]){b[1]=b[0];b[0]=[d,j]}else if(d<b[1][0])b[1]=[d,j]}for(const[,j]of b)if(j>i)OE.push([i,j])}
+// sample glyph pixels of the sentence (once fonts load)
+let GLY=[];
+function sampleText(){const o=document.createElement('canvas');o.width=W;o.height=H;const g=o.getContext('2d');g.fillStyle='#fff';g.font='600 64px S';g.textAlign='center';g.fillText(SENT,W/2,H/2+20);const d=g.getImageData(0,0,W,H).data;const pts=[];for(let y=0;y<H;y+=4)for(let x=0;x<W;x+=4)if(d[(y*W+x)*4+3]>128)pts.push([x,y]);GLY=pts.length?ORB.map((_,i)=>pts[Math.floor(i*pts.length/ORB.length)]):[]}
+function orbProj(t,cx,cy,R){const ry=t*.32,rx=.35,cY=Math.cos(ry),sY=Math.sin(ry),cX=Math.cos(rx),sX=Math.sin(rx);return ORB.map(p=>{const n=1+.06*Math.sin(p[0]*4+t*1.7)*Math.cos(p[1]*5-t);const x=p[0]*n,y=p[1]*n,z=p[2]*n;const X=x*cY-z*sY;let Z=x*sY+z*cY;const Y=y*cX-Z*sX;Z=y*sX+Z*cX;const s=2.6/(2.6+Z);return[cx+X*R*s,cy+Y*R*s,Z]})}
+function drawOrb(pr,a,hot=1,edges=1){c.lineWidth=1;if(edges)for(const[i,j]of OE){const A=pr[i],B=pr[j];c.strokeStyle=`rgba(${IV},${(.05+(1-(A[2]+B[2])/2)*.22)*a*edges})`;c.beginPath();c.moveTo(A[0],A[1]);c.lineTo(B[0],B[1]);c.stroke()}
+ for(const[x,y,z]of pr){c.fillStyle=`rgba(${IV},${(.25+(1-z)*.5)*a})`;c.beginPath();c.arc(x,y,1.5,0,6.283);c.fill()}
+ for(let i=0;i<pr.length;i+=53){const[x,y,z]=pr[i];if(z>.25)continue;glow(x,y,16,OR,.9*a*hot)}}
+function glow(x,y,r,col,a){if(a<=0)return;const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(${col},${a})`);g.addColorStop(1,`rgba(${col},0)`);c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,6.283);c.fill()}
+function text(s,x,y,size,col,a,weight=800,align='center',ls=-0.03){if(a<=0)return;c.save();c.globalAlpha=a;c.fillStyle=col;c.font=`${weight} ${size}px S`;c.textAlign=align;c.letterSpacing=`${ls*size}px`;c.fillText(s,x,y);c.restore()}
+// ---------- fractal neural tree
+const TREE=[];(function grow(x,y,ang,len,depth,t0){if(depth>8)return;const x2=x+Math.cos(ang)*len,y2=y+Math.sin(ang)*len;TREE.push({x,y,x2,y2,depth,t0});const k=2+(rnd()<.35?1:0);for(let i=0;i<k;i++)grow(x2,y2,ang+(rnd()-.5)*1.25,len*(.68+rnd()*.12),depth+1,t0+.16+rnd()*.08)})(0,0,-Math.PI/2,185,0,0);
+// ---------- flock (deterministic stepping)
+const FL=Array.from({length:900},()=>({x:.3+rnd()*.4,y:.3+rnd()*.35,vx:(rnd()-.5)*.004,vy:(rnd()-.5)*.004}));let flT=0;
+function stepFlock(T){while(flT<T){flT+=1/30;const ax=.5+.22*Math.sin(flT*.6),ay=.48+.15*Math.sin(flT*1.2);const cell=new Map(),key=(x,y)=>((x*14)|0)+','+((y*14)|0);for(const b of FL){const k=key(b.x,b.y);(cell.get(k)||cell.set(k,[]).get(k)).push(b)}
+ for(const b of FL){let cx=0,cy=0,vx=0,vy=0,px=0,py=0,n=0;const gx=(b.x*14)|0,gy=(b.y*14)|0;for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++)for(const o of cell.get((gx+i)+','+(gy+j))||[]){if(o===b)continue;const dx=o.x-b.x,dy=o.y-b.y,d2=dx*dx+dy*dy;if(d2>.005)continue;n++;cx+=o.x;cy+=o.y;vx+=o.vx;vy+=o.vy;if(d2<.0003){px-=dx;py-=dy}}
+  if(n){b.vx+=(cx/n-b.x)*.006+(vx/n-b.vx)*.08+px*.03;b.vy+=(cy/n-b.y)*.006+(vy/n-b.vy)*.08+py*.03}b.vx+=(ax-b.x)*.0008;b.vy+=(ay-b.y)*.0008;const sp=Math.hypot(b.vx,b.vy);if(sp>.0062){b.vx*=.0062/sp;b.vy*=.0062/sp}if(sp<.0026){b.vx*=.0026/sp;b.vy*=.0026/sp}b.x+=b.vx;b.y+=b.vy}}}
+// ---------- burst
+const BU=Array.from({length:220},()=>({a:rnd()*6.283,s:200+rnd()*900,r:2+rnd()*4,l:.6+rnd()*1.4}));
+const EM=Array.from({length:80},()=>({x:rnd()*W,y:rnd()*H,v:18+rnd()*40,r:1.4+rnd()*2.6,p:rnd()*6}));
+
+function render(t){
+ c.fillStyle='#070807';c.fillRect(0,0,W,H);
+ // ambient: faint perspective grid + glow + embers
+ const gl=c.createRadialGradient(W*.78,0,0,W*.78,0,900);gl.addColorStop(0,`rgba(${OR},.16)`);gl.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=gl;c.fillRect(0,0,W,H);
+ for(const e of EM){const y=((e.y-e.v*t)%H+H)%H;glow(e.x+Math.sin(t*.7+e.p)*12,y,e.r*5,'255,140,60',.28+.18*Math.sin(t*2+e.p))}
+ let fl=0;for(const h of HITS){const d=t-h;if(d>=0&&d<.3)fl=Math.max(fl,(1-d/.3)*.22)}
+ const cx=W/2,cy=H/2-20;
+ // ===== S1 0-4.5 typed sentence
+ if(t<4.5){const n=Math.floor(SENT.length*lin(t,.6,3.4));const a=eo(lin(t,.2,.6));
+  text('it starts with one sentence.',cx,H/2-130,44,`rgb(${OR})`,a*(1-lin(t,4.1,4.5)),700,'center',.12);
+  c.save();c.font='600 64px S';c.textAlign='center';const full=c.measureText(SENT).width;c.restore();
+  c.save();c.font='600 64px S';c.textAlign='left';c.fillStyle=`rgba(${IV},${a})`;c.fillText(SENT.slice(0,n),cx-full/2,H/2+20);const w=c.measureText(SENT.slice(0,n)).width;if(Math.floor(t*2.5)%2)c.fillStyle=`rgb(${OR})`,c.fillRect(cx-full/2+w+6,H/2-28,4,60);c.restore()}
+ // ===== S2 4.5-8.5 sentence shatters into the orb
+ if(t>=4.5&&t<8.6){if(!GLY.length)sampleText();const k=eio(lin(t,4.5,6.4)),out=lin(t,8.2,8.6);const pr=orbProj(t,cx,cy,300);
+  const mixed=pr.map((p,i)=>{const g=GLY[i]||[cx,cy];const sw=Math.sin(i*1.7)*120*Math.sin(k*Math.PI);return[g[0]+(p[0]-g[0])*k+sw*.3,g[1]+(p[1]-g[1])*k+sw,p[2]]});
+  drawOrb(mixed,1-out*.6,lin(t,6.2,6.8),lin(t,6,7));
+  text('becomes an agent.',cx,H-140,92,`rgb(${IV})`,eb(lin(t,6.6,7))*(1-out),800);}
+ // ===== S3 8.5-12.5 fractal neural tree grows out of the orb
+ if(t>=8.4&&t<12.6){const out=lin(t,12.2,12.6),TX=W*.64,pr=orbProj(t,TX,H*.86,130);drawOrb(pr,.7*(1-out),1,.6);
+  const g=(t-8.5)*1.05;c.lineCap='round';
+  for(const s of TREE){const p=cl((g-s.t0)/.18);if(p<=0)continue;const ox=TX,oy=H*.86-130;const x1=ox+s.x,y1=oy+s.y,x2=ox+s.x+(s.x2-s.x)*p,y2=oy+s.y+(s.y2-s.y)*p;
+   c.strokeStyle=`rgba(${IV},${(.55-s.depth*.045)*(1-out)})`;c.lineWidth=Math.max(.6,4.2-s.depth*.42);c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();
+   if(p>=1&&s.depth>=7){c.fillStyle=`rgba(${IV},${.55*(1-out)})`;c.beginPath();c.arc(x2,y2,1.8,0,6.283);c.fill()}
+   const q=((t*1.4+s.depth*.11+s.x*.003)%1);if(p>=1&&s.depth%3==1&&TREE.indexOf(s)%3==0)glow(x1+(s.x2-s.x)*q,y1+(s.y2-s.y)*q,10,OR,.9*(1-out))}
+  text('it thinks.',140,250,96,`rgb(${IV})`,eb(lin(t,8.6,8.95))*(1-out),800,'left');
+  text('it backtests.',140,360,96,`rgb(${IV})`,eb(lin(t,9.6,9.95))*(1-out),800,'left');
+  text('720 hours of real prices.',140,440,40,`rgb(${OR})`,eo(lin(t,10.5,10.9))*(1-out),700,'left',.02)}
+ // ===== S4 12.5-16.5 three layers
+ if(t>=12.4&&t<16.6){const out=lin(t,16.2,16.6),p=lin(t,12.5,16.5),tilt=.5+p*.7,yaw=.7+p*.8,spread=.95-p*.35,ct=Math.cos(tilt),st=Math.sin(tilt),cY=Math.cos(yaw),sY=Math.sin(yaw),sc=330,G=44;
+  const proj=(x,y,z)=>{const X=x*cY-z*sY;let Z=x*sY+z*cY;const Y=y*ct-Z*st;Z=y*st+Z*ct;const s=3.2/(3.2+Z);return[W*.64+X*sc*s,H/2+Y*sc*s]};
+  const LB=['STRATEGY','THE GATE','FIRING LINE'];
+  for(let L=0;L<3;L++){const ap=eo(lin(t,12.5+L*.55,13+L*.55))*(1-out);if(ap<=0)continue;const off=(L-1)*spread,A=[.22,.3,.18][L],f=[2.2,3.1,4][L];
+   const hg=(u,v)=>{const r=Math.hypot(u,v);return off-A*Math.exp(-r*r*2.2)*Math.cos(r*f*2-t*1.6+L)-.04*Math.sin(u*6+t)*Math.cos(v*5-t*.8)};
+   for(let d=0;d<2;d++)for(let i=0;i<=G;i++){c.beginPath();for(let j=0;j<=G;j++){const u=(d?i:j)/G*2-1,v=(d?j:i)/G*2-1;const[X,Y]=proj(u,-hg(u,v),v);j?c.lineTo(X,Y):c.moveTo(X,Y)}const heat=Math.max(0,1-Math.abs(i/G-.5)*3.2);c.strokeStyle=heat>.05?`rgba(${OR},${(.15+heat*.5)*ap})`:`rgba(${IV},${.13*ap})`;c.lineWidth=1;c.stroke()}
+   const[lx,ly]=proj(1.08,-off,-1);text(`0${L+1}  ${LB[L]}`,Math.min(lx+20,W-260),ly,24,`rgb(${OR})`,ap,700,'left',.14)}
+  text('built in',140,420,100,`rgb(${IV})`,eb(lin(t,12.6,12.95))*(1-out),800,'left');
+  text('three layers.',140,530,100,`rgb(${OR})`,eb(lin(t,13.1,13.45))*(1-out),800,'left')}
+ // ===== S5 16.5-20.5 the swarm, the gate locks one call
+ if(t>=16.4&&t<20.6){stepFlock(t-16.4);const out=lin(t,20.2,20.6),inn=eo(lin(t,16.5,17)),S=2300;let cxf=0,cyf=0;for(const b of FL){cxf+=b.x;cyf+=b.y}cxf/=FL.length;cyf/=FL.length;const ox=W/2-cxf*S,oy=H*.4-cyf*S;let mx=0,my=0;
+  for(const b of FL){const X=ox+b.x*S,Y=oy+b.y*S;mx+=X;my+=Y;const s=1.6+2*Math.abs(Math.sin(b.x*30+t));c.fillStyle=`rgba(${IV},${(.35+.4*b.y)*inn*(1-out)})`;c.fillRect(X,Y,s,s)}
+  mx/=FL.length;my/=FL.length;const lock=eo(lin(t,18.2,18.9)),tg=FL[137],tx=ox+tg.x*S,ty=oy+tg.y*S,rx=mx+(tx-mx)*lock,ry=my+(ty-my)*lock,rr=S*.09*(1-lock*.8);
+  c.strokeStyle=`rgba(${OR},${(1-out)})`;c.lineWidth=3;c.beginPath();c.ellipse(rx,ry,rr,rr*.9,t*.5,0,6.283);c.stroke();
+  c.strokeStyle=`rgba(${IV},${.9*(1-out)})`;c.lineWidth=2;[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([i,j])=>{const X=rx+i*(rr+18),Y=ry+j*(rr*.9+18);c.beginPath();c.moveTo(X-12*i,Y);c.lineTo(X,Y);c.lineTo(X,Y-12*j);c.stroke()});
+  if(lock>.9)glow(tx,ty,30,OR,1-out);
+  text('every pool on robinhood chain.',cx,H-210,58,`rgb(${IV})`,eo(lin(t,16.6,17))*(1-out),800);
+  text('seven checks. one call.',cx,H-120,58,`rgb(${OR})`,eb(lin(t,18.3,18.7))*(1-out),800)}
+ // ===== S6 20.5-24.5 fired
+ if(t>=20.4&&t<24.6){const out=lin(t,24.2,24.6),pr=orbProj(t,cx,cy,260);const red=lin(t,20.6,21.3),burn=lin(t,22,23.4);
+  drawOrb(pr.map(([x,y,z],i)=>{const d=burn*(1+(i%7)*.3);return[x+Math.cos(i)*d*160,y-d*220-Math.sin(i)*d*60,z]}),(1-burn)*(1-out),0,1-burn);
+  glow(cx,cy,220*(1+red*.4),RED,.55*red*(1-burn));
+  const hit=21.6;if(t>=hit){const d=t-hit;for(const p of BU){if(d>p.l)continue;glow(cx+Math.cos(p.a)*p.s*d,cy+Math.sin(p.a)*p.s*d+240*d*d,p.r*5,'255,160,70',1-d/p.l)}}
+  const sl=eb(lin(t,hit,hit+.22));if(sl>0){c.save();c.translate(cx,cy);c.rotate(-.24);c.scale(3-2*sl,3-2*sl);c.globalAlpha=sl*(1-out);c.strokeStyle=`rgb(${RED})`;c.lineWidth=10;c.strokeRect(-250,-80,500,160);c.fillStyle=`rgb(${RED})`;c.font='800 120px S';c.textAlign='center';c.textBaseline='middle';c.fillText('FIRED',0,6);c.restore()}
+  text('crossed its line.',cx,H-250,52,`rgb(${IV})`,eo(lin(t,20.7,21.1))*(1-out),700);
+  text('fired. in public.',cx,H-130,104,`rgb(${OR})`,eb(lin(t,22.5,22.85))*(1-out),800)}
+ // ===== S7 24.5-26.5 logo
+ if(t>=24.4){const inn=lin(t,24.5,25.2),fade=lin(t,26,26.5),pr=orbProj(t,cx,cy-60,330);drawOrb(pr,.45*eo(inn)*(1-fade),.6,.8);
+  const s=230,x=cx-s/2,y=cy-60-s/2,u=s/64,hd=eb(lin(t,24.6,25.1)),bd=eb(lin(t,24.5,24.95)),eye=lin(t,25.1,25.3);
+  c.save();c.globalAlpha=eo(inn)*(1-fade);c.fillStyle=`rgb(${OR})`;rr(x,y,s,s,16*u);c.fillStyle='#0b0c0b';rr(x+22*u,y+(10.5-40*(1-hd))*u,20*u,15.5*u,5.5*u);rr(x+14.5*u,y+(29+40*(1-bd))*u,35*u,24.5*u,7.5*u);
+  c.fillStyle=`rgb(${OR})`;c.beginPath();c.arc(x+32*u,y+(18.2-40*(1-hd))*u,3.4*u*eye,0,6.283);c.fill();rr(x+24.5*u,y+38.5*u,15*u,3.4*u,1.7*u);c.restore();
+  glow(x+32*u,y+18.2*u,40,OR,.6*eye*(1-fade));
+  text('golem',cx,cy+190,120,`rgb(${IV})`,eo(lin(t,25,25.4))*(1-fade),800);
+  text('build yours · getgolem.xyz',cx,cy+280,46,`rgb(${OR})`,eo(lin(t,25.3,25.7))*(1-fade),700)}
+ if(fl>0){c.fillStyle=`rgba(${OR},${fl})`;c.fillRect(0,0,W,H)}
+ // vignette
+ const vg=c.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*1.05);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.6)');c.fillStyle=vg;c.fillRect(0,0,W,H);
+}
+function rr(x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,r);c.fill()}
+window.banner=function(){const BW=1500,BH=500;const cv=document.getElementById('cv');cv.width=BW;cv.height=BH;document.body.style.width=BW+'px';document.body.style.height=BH+'px';
+ c.fillStyle='#070807';c.fillRect(0,0,BW,BH);
+ let g=c.createRadialGradient(BW*.82,BH*.45,0,BW*.82,BH*.45,520);g.addColorStop(0,'rgba(255,106,36,.22)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(0,0,BW,BH);
+ for(const e of EM.slice(0,40)){glow(e.x*BW/W,e.y*BH/H,e.r*4,'255,140,60',.35)}
+ const pr=orbProj(5.2,BW*.9,BH*.5,195);drawOrb(pr,1,1,1);
+ const x=560,y=60;
+ text('Build an agent in one sentence.',x,y+190,52,'rgb(236,233,224)',1,800,'left');
+ text('Watch it trade in public.',x,y+252,52,'rgb(255,106,36)',1,800,'left');
+ text('AI TRADING AGENTS  ·  ROBINHOOD CHAIN',x,y+316,18,'rgb(143,140,131)',1,700,'left',.16);
+ const vg=c.createLinearGradient(0,0,BW,0);vg.addColorStop(0,'rgba(0,0,0,.35)');vg.addColorStop(.3,'rgba(0,0,0,0)');c.fillStyle=vg;c.fillRect(0,0,BW,BH);};
+window.render=render;document.fonts.ready.then(()=>{sampleText();render(0)});
+</script></body></html>

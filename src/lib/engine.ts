@@ -14,7 +14,7 @@ export type AgentResult = AgentSpec & {
 
 export const AGENTS: AgentSpec[] = [
   { id: "breakout-btc", name: "Breakout Bob", handle: "bob", live: false, strategy: "24h breakout", markets: ["BTC"], fireAt: 0.06, risk: "Medium", hires: 418,
-    pitch: "Buys BTC when it clears the 24h high, sells when it loses the 12h low. Never guesses, never averages down." },
+    pitch: "Buys BTC when it clears the 24h high, sells when it breaks below the 12h low. Never guesses, never averages down." },
   { id: "meanrev-eth", name: "Dip Daisy", handle: "daisy", live: false, strategy: "RSI mean reversion", markets: ["ETH"], fireAt: 0.07, risk: "Medium", hires: 362,
     pitch: "Buys ETH when RSI drops under 32, sells it back over 68. Loves red candles, hates holding bags." },
   { id: "momo-sol", name: "Momo Max", handle: "max", live: false, strategy: "EMA 9/21 cross", markets: ["SOL"], fireAt: 0.09, risk: "High", hires: 290,
@@ -106,7 +106,7 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFireOrOpts: boolea
       case "24h breakout": case "Open-range breakout": {
         const hi = Math.max(...c.slice(i - 24, i)); const lo = Math.min(...c.slice(i - 12, i));
         if (!inPos && c[i] > hi) buy(i, m, `${m} broke the 24h high ${hi.toFixed(2)}`);
-        else if (inPos && c[i] < lo) sell(i, m, `${m} lost the 12h low ${lo.toFixed(2)}`);
+        else if (inPos && c[i] < lo) sell(i, m, `${m} broke below the 12h low ${lo.toFixed(2)}`);
         else lastHold(inPos ? `${m} above the 12h low, trend intact` : `${m} no breakout (${pct(c[i] / hi - 1)}% vs 24h high)`);
         break;
       }
