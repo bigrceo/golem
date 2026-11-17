@@ -60,7 +60,7 @@ export default function Nav() {
           <div className="navr">
             <a className="xb" href="https://github.com/bigrceo/hire" target="_blank" rel="noreferrer" aria-label="GitHub"><GitHubIcon /></a>
             <Link href="/floor" className="btn btn-ghost hidden md:inline-flex">Enter the floor</Link>
-            <Link href="/studio" className="btn btn-accent">Build an agent</Link>
+            <Link href="/studio" className="btn btn-accent"><span className="sm:hidden">Build</span><span className="hidden sm:inline">Build an agent</span></Link>
             <button className="mbtn" type="button" aria-label="Menu" aria-expanded={mobile} onClick={() => setMobile(!mobile)}><i /><i /></button>
           </div>
         </div>

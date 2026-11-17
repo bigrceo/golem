@@ -26,6 +26,7 @@ h1, h2, h3 { letter-spacing: -0.035em; }
 .brand { color: var(--brand); }
 .card { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 12px 30px -22px rgba(60,40,20,.35); }
 .card-soft { background: rgba(23,28,24,.035); border: 1px solid var(--line); border-radius: 14px; }
+@layer components {
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 22px; border-radius: 12px; font-weight: 600; font-size: 15px; transition: transform .2s var(--q), background .2s, box-shadow .2s, opacity .2s; cursor: pointer; white-space: nowrap; }
 .btn:active { transform: scale(.97); }
 .btn-brand { background: var(--fg); color: #fff; box-shadow: 0 8px 20px -10px rgba(23,28,24,.6); }
@@ -35,6 +36,7 @@ h1, h2, h3 { letter-spacing: -0.035em; }
 .btn-ghost { border: 1px solid var(--line); color: var(--fg); background: var(--paper); }
 .btn-ghost:hover { border-color: rgba(23,28,24,.3); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
+}
 .up { color: var(--up); } .down { color: var(--down); }
 .ticker { animation: ticker 70s linear infinite; }
 @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -54,7 +56,7 @@ nav#nav .nwrap { pointer-events: auto; max-width: 1280px; margin: 0 auto; border
 nav#nav.frost .nwrap { backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); background: rgba(255,253,248,.72); box-shadow: inset 0 0 0 1px rgba(23,28,24,.08), inset 0 1px 0 rgba(255,255,255,.9), 0 18px 40px -24px rgba(60,40,20,.45); }
 nav#nav.open .nwrap, nav#nav.mopen .nwrap { backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); background: rgba(255,253,248,.96); box-shadow: inset 0 0 0 1px rgba(23,28,24,.08), 0 30px 60px -24px rgba(60,40,20,.5); }
 nav#nav .bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 60px; padding: 0 10px 0 14px; transition: height .45s var(--q), padding .45s var(--q); }
-nav#nav .btn { height: 40px; padding: 0 16px; font-size: 13.5px; border-radius: 11px; }
+@layer components { nav#nav .btn { height: 40px; padding: 0 16px; font-size: 13.5px; border-radius: 11px; } }
 .nlinks { display: none; gap: 2px; padding: 4px; border-radius: 13px; box-shadow: inset 0 0 0 1px var(--line); background: rgba(255,253,248,.6); }
 @media (min-width: 1024px) { .nlinks { display: flex; } }
 .nlinks a, .nlinks button { display: inline-flex; align-items: center; gap: 4px; height: 34px; padding: 0 13px; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); transition: color .3s, background-color .3s; }

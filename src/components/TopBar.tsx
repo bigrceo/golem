@@ -6,7 +6,7 @@ export default function TopBar() {
         <div className="flex items-center gap-4 min-w-0">
           <span className="font-bold brand">$HIRE</span>
           <span className="hidden sm:inline">contract posted at launch</span>
-          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />agents live on Robinhood Chain</span>
+          <span className="hidden sm:flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />agents live on Robinhood Chain</span>
         </div>
         <div className="flex items-center gap-4 shrink-0">
           <Link href="/floor" className="hover:text-black hidden md:inline">The floor</Link>
