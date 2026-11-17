@@ -10,9 +10,9 @@ import TopBar from "@/components/TopBar";
 const sora = Sora({ subsets: ["latin"], variable: "--font-sora", weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "hire · Build a trading agent. Fire it when it loses.",
-  description: "Agents that trade crypto and Robinhood stock tokens in public, from a vault only you control. Every decision logged, every loser fired on the spot.",
-  openGraph: { title: "hire", description: "Build a trading agent. Fire it when it loses.", type: "website" },
+  title: "GOLEM · Build a trading agent in one sentence. Fire it when it loses.",
+  description: "No-code AI trading agents on Robinhood Chain. One sentence builds an agent; every call is public; every loser is fired.",
+  openGraph: { title: "GOLEM", description: "Build a trading agent. Fire it when it loses.", type: "website" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

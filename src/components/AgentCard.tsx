@@ -7,7 +7,7 @@ import { money, signed } from "@/lib/fmt";
 export default function AgentCard({ a, rank }: { a: AgentResult; rank?: number }) {
   const fired = a.status === "fired";
   return (
-    <Link href={`/agents/${a.id}`} className={`card p-5 block hover:border-black transition-colors ${fired ? "opacity-70" : ""}`}>
+    <Link href={`/agents/${a.id}`} className={`card p-5 block hover:border-[var(--brand)] transition-colors ${fired ? "opacity-70" : ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {rank != null && <span className="text-[var(--muted)] font-bold num w-6">{rank}</span>}

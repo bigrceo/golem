@@ -8,7 +8,7 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const B = useMemo(() => { let s = 11; const r = () => ((s = (s * 16807) % 2147483647) / 2147483647); return Array.from({ length: 600 }, () => ({ x: 0.3 + r() * 0.4, y: 0.3 + r() * 0.3, vx: (r() - 0.5) * 0.004, vy: (r() - 0.5) * 0.004 })); }, []);
   useCanvasLoop(ref, (c, w, h, t, dpr) => {
-    c.fillStyle = "rgba(23,28,24,.3)"; c.fillRect(0, 0, w, h);
+    c.fillStyle = "rgba(7,8,7,.3)"; c.fillRect(0, 0, w, h);
     const S = Math.min(w, h * 0.82), ox = (w - S) / 2, oy = h * 0.04;
     const ax = 0.5 + 0.22 * Math.sin(t * 0.37), ay = 0.45 + 0.16 * Math.sin(t * 0.74);
     const cell = new Map<string, typeof B>(); const key = (x: number, y: number) => ((x * 12) | 0) + "," + ((y * 12) | 0);
@@ -24,7 +24,7 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
     }
     for (const b of B) { const s = dpr * (1.2 + 1.4 * Math.abs(Math.sin(b.x * 30 + t))); const g = 150 + ((b.y * 105) | 0); c.fillStyle = `rgb(${g},${g - 6},${g - 14})`; c.fillRect(ox + b.x * S, oy + b.y * S, s, s); }
     const mx = ox + (sx / B.length) * S, my = oy + (sy / B.length) * S;
-    c.strokeStyle = "#f2621b"; c.lineWidth = 2 * dpr; c.beginPath(); c.ellipse(mx, my, S * 0.19, S * 0.17, t * 0.4, 0, Math.PI * 2); c.stroke();
+    c.strokeStyle = "#ff6a24"; c.lineWidth = 2 * dpr; c.beginPath(); c.ellipse(mx, my, S * 0.19, S * 0.17, t * 0.4, 0, Math.PI * 2); c.stroke();
     c.strokeStyle = "#f5f1e8"; c.lineWidth = dpr;
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([i, j], k) => { const X = mx + i * S * (0.2 + 0.015 * Math.sin(t * 2 + k)), Y = my + j * S * (0.18 + 0.015 * Math.cos(t * 2 + k)); c.strokeRect(X - 5 * dpr, Y - 5 * dpr, 10 * dpr, 10 * dpr); });
     c.fillStyle = "#d8d3c6"; c.font = `700 ${S * 0.06}px Sora, sans-serif`; c.textAlign = "center"; c.fillText(label, w / 2, oy + S + S * 0.07);

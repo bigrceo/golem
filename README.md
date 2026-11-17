@@ -1,6 +1,6 @@
-<p align="center"><img src="https://hire-desk-five.vercel.app/icon" width="64" alt="hire"></p>
-<h1 align="center">hire</h1>
-<p align="center"><b>Build a trading agent in one sentence. Fire it when it loses.</b><br>
+<p align="center"><img src="public/brand/pfp.svg" width="72" alt="GOLEM"></p>
+<h1 align="center">GOLEM</h1>
+<p align="center"><b>Build an agent in one sentence. Fire it when it loses.</b><br>In the legend, a golem comes alive from one word written on its brow. Here, a trading agent comes alive from one sentence.<br>
 No-code trading agents on Robinhood Chain: stock tokens, crypto and the trenches, every call on the record.<br>
 <a href="https://hire-desk-five.vercel.app">Open the app</a> · <a href="https://hire-desk-five.vercel.app/studio">Agent Studio</a> · <a href="https://hire-desk-five.vercel.app/floor">The floor</a> · <a href="https://hire-desk-five.vercel.app/agents">Leaderboard</a></p>
 
@@ -40,6 +40,10 @@ cd contracts && forge test             # 9 unit tests + 1 Robinhood Chain fork t
 ```
 
 Env for the site: `HIRE_API` (worker URL), `HIRE_API_SECRET` (shared with the worker's `SECRET`).
+
+## Brand
+
+Name GOLEM, ticker $GOLEM. Mark, square PFP and X banner in `public/brand/`. Engravings in `public/art/` (light and dark).
 
 ## Credits
 

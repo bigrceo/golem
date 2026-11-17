@@ -11,7 +11,7 @@ export default function HeroInput() {
         <input value={t} onChange={(e) => setT(e.target.value)} onKeyDown={(e) => e.key === "Enter" && go()} placeholder={TRIES[0]} className="!border-0 flex-1 !text-base !px-4 outline-none" />
         <button onClick={() => go()} className="btn btn-accent">Build it</button>
       </div>
-      <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">{TRIES.slice(1).map((x) => <button key={x} onClick={() => go(x)} className="text-[var(--muted)] hover:text-black hover:underline underline-offset-4">{x}</button>)}</div>
+      <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">{TRIES.slice(1).map((x) => <button key={x} onClick={() => go(x)} className="text-[var(--muted)] hover:text-white hover:underline underline-offset-4">{x}</button>)}</div>
     </div>
   );
 }

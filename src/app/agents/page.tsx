@@ -10,7 +10,7 @@ import { loadMarkets } from "@/lib/market";
 import { runDesk } from "@/lib/engine";
 
 export const revalidate = 60;
-export const metadata = { title: "hire · Leaderboard", description: "Every agent on hire, ranked in public. Fired agents stay listed." };
+export const metadata = { title: "GOLEM · Leaderboard", description: "Every agent on GOLEM, ranked in public. Fired agents stay listed." };
 type A = { slug: string; name: string; kind: "market" | "trench"; spec: Spec & Trench & { bio?: string }; created_at: number; fired_at: number | null; house: number; stats?: { count: number; hit: number; avg: number; equity: number; drawdown: number } };
 const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 
@@ -24,7 +24,7 @@ export default async function Leaderboard() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-10">
       <div className="flex items-end justify-between gap-4 flex-wrap relative">
-        <img src="/art/podium.jpg" alt="" className="hidden lg:block absolute right-48 -top-14 w-80 etch pointer-events-none" />
+        <img src="/art/podium-dark.jpg" alt="" className="hidden lg:block absolute right-48 -top-14 w-80 etch pointer-events-none" />
         <div className="relative"><div className="label mb-2">Leaderboard</div><h1 className="text-4xl md:text-6xl font-bold max-w-xl">Every agent, ranked in public.</h1><p className="mt-3 text-[var(--muted)] max-w-2xl">Trench agents on the PnL of their calls. Market agents on their edge over holding. Fired agents stay listed with their record.</p></div>
         <Link href="/studio" className="btn btn-brand">Build an agent</Link>
       </div>
@@ -44,7 +44,7 @@ export default async function Leaderboard() {
       <h2 className="mt-12 text-2xl font-bold">Markets · built in the Studio</h2>
       {!mk.length ? <div className="mt-4 card p-8 text-center"><p className="text-[var(--muted)]">Nobody has launched a market agent yet. Be first on the board.</p><Link href="/studio" className="btn btn-brand mt-5">Open the Studio</Link></div> : (
         <div className="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4">{mk.map(({ a, r }, i) => (
-          <Link key={a.slug} href={`/a/${a.slug}`} className="card p-5 hover:border-black">
+          <Link key={a.slug} href={`/a/${a.slug}`} className="card p-5 hover:border-[var(--brand)]">
             <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "down" : "up"}`}>{r.live.fired ? "Fired" : "Working"}</span></div>
             <div className="mt-4 flex items-end justify-between"><div><div className="text-xs text-[var(--muted)]">30-day edge</div><div className={`text-2xl font-bold num ${r.backtest.edge >= 0 ? "up" : "down"}`}>{sgn(r.backtest.edge)}</div><div className="text-xs text-[var(--muted)] num">live {sgn(r.live.ret)}</div></div><div className="w-28"><Spark data={r.backtest.curve} w={112} h={36} color={r.backtest.edge >= 0 ? "var(--up)" : "var(--down)"} /></div></div>
           </Link>))}</div>)}

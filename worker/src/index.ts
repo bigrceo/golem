@@ -196,9 +196,9 @@ async function handle(req: Request, env: Env): Promise<Response> {
 
   if (p === "/floor") {
     const now = Date.now();
-    const toks = (await env.DB.prepare("select token, pair, symbol, name, created, price, fdv, liq, buys_h1, sells_h1, ch_m5, ch_h1, ch_h24, vol_h24, image, passed, gate from tokens where price > 0 and liq >= 1000 and created > ? order by vol_h24 desc limit 60").bind(now - 72 * H).all<Tok>()).results;
+    const toks = (await env.DB.prepare("select token, pair, symbol, name, created, price, fdv, liq, buys_h1, sells_h1, ch_m5, ch_h1, ch_h24, vol_h24, image, passed, gate from tokens where price > 0 and liq >= 1000 and created > ? order by passed desc, vol_h24 desc limit 60").bind(now - 72 * H).all<Tok>()).results;
     const checks = (await env.DB.prepare("select * from checks order by id desc limit 30").all()).results;
-    const stats = await env.DB.prepare("select (select count(*) from tokens) as pools, (select count(*) from tokens where liq >= 1000) as tracked, (select count(*) from calls) as calls, (select count(*) from checks where passed = 0) as blocked, (select count(*) from checks where passed = 1) as passed, (select count(*) from agents) as agents, (select max(t) from calls) as last_call").first();
+    const stats = await env.DB.prepare("select (select count(*) from tokens) as pools, (select count(*) from tokens where liq >= 1000) as tracked, (select count(*) from calls) as calls, (select count(*) from tokens where price > 0 and liq >= 1000 and passed = 0) as blocked, (select count(*) from tokens where price > 0 and liq >= 1000 and passed = 1) as passed, (select count(*) from agents) as agents, (select max(t) from calls) as last_call").first();
     return json({ at: now, lastRun: Number(await meta(env, "lastRun")), stats, tokens: toks.map((t) => ({ ...t, gate: JSON.parse(t.gate || "[]") })), checks });
   }
   if (p === "/agents" && req.method === "GET") {

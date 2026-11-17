@@ -22,10 +22,10 @@ export default function LayerWaves({ section, labels, onLayer }: { section: stri
         c.beginPath();
         for (let j = 0; j <= G; j++) { const u = (dir ? i : j) / G * 2 - 1, v = (dir ? j : i) / G * 2 - 1; const [X, Y] = proj(u, -hgt(u, v), v); if (j) c.lineTo(X, Y); else c.moveTo(X, Y); }
         const heat = Math.max(0, 1 - Math.abs(i / G - 0.5) * 2 * 1.6);
-        c.strokeStyle = heat > 0.05 ? `rgba(242,98,27,${0.12 + heat * 0.45})` : "rgba(23,28,24,.13)"; c.lineWidth = dpr * 0.7; c.stroke();
+        c.strokeStyle = heat > 0.05 ? `rgba(255,106,36,${0.12 + heat * 0.45})` : "rgba(236,233,224,.13)"; c.lineWidth = dpr * 0.7; c.stroke();
       }
-      const [lx, ly] = proj(-1.05, -off, 1); c.fillStyle = "#6c6a62"; c.font = `600 ${11 * dpr}px Sora, sans-serif`; const txt = `0${L + 1} ${labels[L] ?? ""}`; const tw = c.measureText(txt).width; c.fillText(txt, Math.max(6 * dpr, lx - tw - 10 * dpr), ly);
-      c.strokeStyle = "rgba(23,28,24,.2)"; c.beginPath(); [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].forEach(([u, v], k) => { const [X, Y] = proj(u, -off, v); if (k) c.lineTo(X, Y); else c.moveTo(X, Y); }); c.stroke();
+      const [lx, ly] = proj(-1.05, -off, 1); c.fillStyle = "#8f8c83"; c.font = `600 ${11 * dpr}px Sora, sans-serif`; const txt = `0${L + 1} ${labels[L] ?? ""}`; const tw = c.measureText(txt).width; c.fillText(txt, Math.max(6 * dpr, lx - tw - 10 * dpr), ly);
+      c.strokeStyle = "rgba(236,233,224,.2)"; c.beginPath(); [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].forEach(([u, v], k) => { const [X, Y] = proj(u, -off, v); if (k) c.lineTo(X, Y); else c.moveTo(X, Y); }); c.stroke();
     }
   }, [labels.join()]);
   return <canvas ref={ref} className="w-full h-full" aria-hidden />;

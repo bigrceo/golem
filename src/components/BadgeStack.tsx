@@ -11,7 +11,7 @@ const POS = ["left-0 top-10", "right-0 top-0", "left-[18%] top-[46%]"];
 function Badge({ a, n, fired }: { a: BadgeAgent; n: number; fired: boolean }) {
   return (
     <div className="card w-[260px] p-0 overflow-hidden relative">
-      <div className="h-9 bg-[var(--fg)] flex items-center justify-between px-4"><span className="text-white text-xs font-bold tracking-[.16em]">HIRE · AGENT</span><span className="w-10 h-2 rounded-full bg-[var(--bg)] opacity-90" /></div>
+      <div className="h-9 bg-black flex items-center justify-between px-4"><span className="text-white text-xs font-bold tracking-[.16em]">GOLEM · AGENT</span><span className="w-10 h-2 rounded-full bg-[var(--bg2)]" /></div>
       <div className="p-4">
         <div className="flex items-center gap-3"><Avatar id={a.slug} name={a.slug} size={46} /><div className="min-w-0"><div className="font-bold truncate">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.role}</div></div></div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
@@ -19,7 +19,7 @@ function Badge({ a, n, fired }: { a: BadgeAgent; n: number; fired: boolean }) {
             <div key={l} className="card-soft py-2"><div className={`text-sm font-bold num ${c}`}>{v}</div><div className="text-[10px] text-[var(--muted)] uppercase tracking-wider">{l}</div></div>))}
         </div>
         <div className="mt-4 flex items-end justify-between">
-          <svg width="120" height="22" aria-hidden>{Array.from({ length: 34 }, (_, i) => <rect key={i} x={i * 3.5} y={0} width={(i * 7 + n) % 3 === 0 ? 2 : 1} height={22} fill="#171c18" opacity={(i * 13 + n) % 5 === 0 ? 0.25 : 0.85} />)}</svg>
+          <svg width="120" height="22" aria-hidden>{Array.from({ length: 34 }, (_, i) => <rect key={i} x={i * 3.5} y={0} width={(i * 7 + n) % 3 === 0 ? 2 : 1} height={22} fill="#ece9e0" opacity={(i * 13 + n) % 5 === 0 ? 0.25 : 0.85} />)}</svg>
           <span className="text-[10px] text-[var(--muted)] num">ID #{String(1000 + n * 37).padStart(4, "0")}</span>
         </div>
       </div>

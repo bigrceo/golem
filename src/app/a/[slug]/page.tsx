@@ -6,6 +6,7 @@ import { marketRecord } from "@/lib/live";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import type { Spec } from "@/lib/rules";
 import Avatar from "@/components/Avatar";
+import TokenLogo from "@/components/TokenLogo";
 import Spark from "@/components/Spark";
 import { hhmm } from "@/lib/fmt";
 
@@ -16,7 +17,7 @@ type Resp = { agent: Agent; stats?: { count: number; hit: number; avg: number; e
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params; const d = await apiGet<Resp>(`/agents/${slug}`, 60);
-  return d ? { title: `${d.agent.name} · hire`, description: d.agent.kind === "trench" ? describeTrench(d.agent.spec) : `A no-code agent trading ${d.agent.spec.market} in public.` } : {};
+  return d ? { title: `@${d.agent.slug} · GOLEM`, description: d.agent.kind === "trench" ? describeTrench(d.agent.spec) : `A no-code agent trading ${d.agent.spec.market} in public.` } : {};
 }
 const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 const ago = (t: number) => { const m = (Date.now() - t) / 60000; return m < 60 ? `${Math.round(m)}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`; };
@@ -30,7 +31,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
   const liveFired = rec?.live.fired;
   return (
     <main className="mx-auto max-w-6xl px-5 py-10">
-      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-black">← Leaderboard</Link>
+      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-white">← Leaderboard</Link>
       <div className="mt-6 flex items-center gap-4 flex-wrap">
         <Avatar id={a.slug} name={a.name} size={64} />
         <div className="flex-1 min-w-0">
@@ -54,7 +55,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
             <div className="mt-3 divide-y divide-[var(--line)]">
               {d.calls?.map((c) => (
                 <div key={c.id} className="py-3">
-                  <div className="flex items-center gap-3"><span className={`font-bold ${c.side === "bear" ? "down" : "up"}`}>{c.side === "bear" ? "BEAR" : "BULL"}</span><a href={`https://dexscreener.com/robinhood/${c.token}`} target="_blank" className="font-bold hover:underline">${c.symbol}</a><span className="text-sm text-[var(--muted)] num">at ${k(c.entry_fdv)} · {ago(c.t)}</span><span className={`ml-auto font-bold num ${c.pnl >= 0 ? "up" : "down"}`}>{sgn(c.pnl)}</span></div>
+                  <div className="flex items-center gap-3"><TokenLogo addr={c.token} symbol={c.symbol} size={30} /><span className={`font-bold ${c.side === "bear" ? "down" : "up"}`}>{c.side === "bear" ? "BEAR" : "BULL"}</span><a href={`https://dexscreener.com/robinhood/${c.token}`} target="_blank" className="font-bold hover:underline">${c.symbol}</a><span className="text-sm text-[var(--muted)] num">at ${k(c.entry_fdv)} · {ago(c.t)}</span><span className={`ml-auto font-bold num ${c.pnl >= 0 ? "up" : "down"}`}>{sgn(c.pnl)}</span></div>
                   <div className="text-sm text-[var(--muted)] mt-1">{c.reason}</div>
                   {c.closed_at && <div className="text-xs mt-1">Closed · {c.exit_reason}</div>}
                 </div>))}
@@ -78,7 +79,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
         </div>
         <div className="mt-5 grid lg:grid-cols-[1fr_1fr] gap-5">
           <div className="card p-6"><div className="label mb-4">30-day backtest vs holding</div>
-            <div className="relative"><Spark data={rec.backtest.holdCurve} w={560} h={120} color="#c9c9c4" fill={false} /><div className="absolute inset-0"><Spark data={rec.backtest.curve} w={560} h={120} color={rec.backtest.edge >= 0 ? "var(--up)" : "var(--down)"} /></div></div>
+            <div className="relative"><Spark data={rec.backtest.holdCurve} w={560} h={120} color="#4a4945" fill={false} /><div className="absolute inset-0"><Spark data={rec.backtest.curve} w={560} h={120} color={rec.backtest.edge >= 0 ? "var(--up)" : "var(--down)"} /></div></div>
             <div className="mt-3 text-sm text-[var(--muted)] num">{rec.backtest.trades} trades · {rec.backtest.winRate}% winners · live for {rec.liveHours}h</div></div>
           <div className="card p-6"><div className="label">Decision log since launch</div>
             <div className="mt-3 divide-y divide-[var(--line)]">

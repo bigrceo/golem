@@ -155,7 +155,7 @@ export default function Dashboard() {
           <div className="label">Hire an agent</div>
           <div className="mt-4 grid grid-cols-2 gap-2">
             {AGENTS.map((a) => (
-              <button key={a.id} onClick={() => { setAgentId(a.id); setLine(Math.round(a.fireAt * 100)); }} className={`text-left card-soft p-3 flex items-center gap-2.5 ${agentId === a.id ? "!border-black !bg-white" : ""}`}>
+              <button key={a.id} onClick={() => { setAgentId(a.id); setLine(Math.round(a.fireAt * 100)); }} className={`text-left card-soft p-3 flex items-center gap-2.5 ${agentId === a.id ? "!border-[var(--brand)] !bg-[var(--bg2)]" : ""}`}>
                 <Avatar id={a.id} name={a.name} size={28} /><span className="min-w-0"><span className="block font-bold text-sm truncate">{a.name}</span><span className="block text-xs text-[var(--muted)]">{a.markets.join("/")}</span></span>
               </button>
             ))}

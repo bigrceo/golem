@@ -5,6 +5,7 @@ import { STRATEGIES, type Spec, type Strategy } from "@/lib/rules";
 import { TRENCH_DEFAULT, matches, describeTrench, k, type Trench, type FloorToken } from "@/lib/trench";
 import Spark from "./Spark";
 import NeuralOrb from "./neural/NeuralOrb";
+import TokenLogo from "./TokenLogo";
 
 const MARKETS = ["BTC", "ETH", "SOL", "TSLA", "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "COIN", "SPY", "QQQ"];
 const EXAMPLES = [
@@ -76,7 +77,7 @@ export default function Studio() {
         <button onClick={() => parseText()} className="btn btn-accent">Build it</button>
       </div>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-        {EXAMPLES.map((e) => <button key={e} onClick={() => parseText(e)} className="text-[var(--muted)] hover:text-black underline-offset-4 hover:underline text-left">{e}</button>)}
+        {EXAMPLES.map((e) => <button key={e} onClick={() => parseText(e)} className="text-[var(--muted)] hover:text-white underline-offset-4 hover:underline text-left">{e}</button>)}
       </div>
       {understood.length > 0 && <div className="mt-4 text-sm"><span className="label mr-3">Understood</span>{understood.join(" · ")}</div>}
 
@@ -100,7 +101,7 @@ export default function Studio() {
                 <div className="label mb-3">Strategy</div>
                 <div className="grid sm:grid-cols-2 gap-2">
                   {(Object.keys(STRATEGIES) as Strategy["kind"][]).map((kk) => (
-                    <button key={kk} onClick={() => setSpec({ ...spec, strategy: STRATEGIES[kk].defaults })} className={`text-left card-soft p-3 ${spec.strategy.kind === kk ? "!border-black !bg-white" : ""}`}>
+                    <button key={kk} onClick={() => setSpec({ ...spec, strategy: STRATEGIES[kk].defaults })} className={`text-left card-soft p-3 ${spec.strategy.kind === kk ? "!border-[var(--brand)] !bg-[var(--bg2)]" : ""}`}>
                       <div className="font-bold text-sm">{STRATEGIES[kk].name}</div><div className="text-xs text-[var(--muted)] mt-1">Buys when {STRATEGIES[kk].buys}</div>
                     </button>
                   ))}
@@ -168,10 +169,10 @@ export default function Studio() {
                   ))}
                 </div>
                 <div className="mt-5 relative">
-                  <Spark data={bt.holdCurve} w={600} h={110} color="#c9c9c4" fill={false} />
+                  <Spark data={bt.holdCurve} w={600} h={110} color="#4a4945" fill={false} />
                   <div className="absolute inset-0"><Spark data={bt.curve} w={600} h={110} color={bt.edge >= 0 ? "var(--up)" : "var(--down)"} /></div>
                 </div>
-                <div className="mt-2 flex gap-5 text-xs text-[var(--muted)]"><span><span className="inline-block w-3 h-0.5 bg-[var(--up)] align-middle mr-1" />agent</span><span><span className="inline-block w-3 h-0.5 bg-[#c9c9c4] align-middle mr-1" />holding</span><span>{bt.trades} trades · {bt.winRate}% winners{bt.fired ? " · would have been fired" : ""}</span></div>
+                <div className="mt-2 flex gap-5 text-xs text-[var(--muted)]"><span><span className="inline-block w-3 h-0.5 bg-[var(--up)] align-middle mr-1" />agent</span><span><span className="inline-block w-3 h-0.5 bg-[#4a4945] align-middle mr-1" />holding</span><span>{bt.trades} trades · {bt.winRate}% winners{bt.fired ? " · would have been fired" : ""}</span></div>
                 <div className="mt-5 divide-y divide-[var(--line)]">
                   {bt.decisions.slice(0, 5).map((d, i) => <div key={i} className="py-2 flex gap-3 text-sm"><span className={`font-bold w-12 shrink-0 ${d.action === "BUY" ? "up" : d.action === "HOLD" ? "text-[var(--muted)]" : "down"}`}>{d.action}</span><span className="truncate">{d.reason}</span></div>)}
                 </div>
@@ -184,7 +185,7 @@ export default function Studio() {
               <div className="mt-4 divide-y divide-[var(--line)]">
                 {live.slice(0, 8).map((t) => (
                   <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-2.5 flex items-center gap-3 text-sm hover:bg-[var(--bg2)] -mx-2 px-2 rounded">
-                    {t.image ? <img src={t.image} alt="" className="w-7 h-7 rounded" /> : <span className="w-7 h-7 rounded bg-black text-white text-xs font-bold flex items-center justify-center">{t.symbol[0]}</span>}
+                    <TokenLogo addr={t.token} symbol={t.symbol} image={t.image} />
                     <span className="font-bold w-24 truncate">${t.symbol}</span><span className="text-[var(--muted)] num flex-1">${k(t.fdv)} FDV · ${k(t.liq)} liq</span><span className={`num font-semibold ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}% 1h</span>
                   </a>
                 ))}
@@ -207,7 +208,7 @@ export default function Studio() {
           )}
 
           {/* LAUNCH */}
-          <div className="card p-6 bg-[#171c18] text-white !border-black">
+          <div className="card p-6 bg-[#070807] text-white border-y border-[var(--line)] !border-[var(--brand)]">
             <div className="label !text-[#9a9a9a]">Launch in public</div>
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name your agent" maxLength={24} className="!bg-[#161616] !border-[#2a2a2a] !text-white flex-1" />

@@ -19,7 +19,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
   const fired = a.status === "fired";
   return (
     <main className="mx-auto max-w-7xl px-5 py-12">
-      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-black">← The desk</Link>
+      <Link href="/agents" className="text-sm text-[var(--muted)] hover:text-white">← The desk</Link>
       <div className="mt-6 grid lg:grid-cols-[minmax(0,1fr)_340px] gap-10">
         <div>
           <div className="flex items-center gap-4">

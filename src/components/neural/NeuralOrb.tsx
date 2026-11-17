@@ -34,16 +34,16 @@ export default function NeuralOrb({ className = "" }: { className?: string }) {
       const s = 2.6 / (2.6 + Z); return [cx + X * R * s, cy + Y * R * s, Z];
     });
     c.lineWidth = dpr * 0.7;
-    for (const [a, b] of E) { const A = pr[a], B = pr[b]; const z = (A[2] + B[2]) / 2; c.strokeStyle = `rgba(23,28,24,${(0.06 + (1 - z) * 0.26) * ease})`; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); }
-    for (const [x, y, z] of pr) { c.fillStyle = `rgba(23,28,24,${0.25 + (1 - z) * 0.45})`; c.fillRect(x - dpr * 0.8, y - dpr * 0.8, dpr * 1.6, dpr * 1.6); }
+    for (const [a, b] of E) { const A = pr[a], B = pr[b]; const z = (A[2] + B[2]) / 2; c.strokeStyle = `rgba(236,233,224,${(0.06 + (1 - z) * 0.26) * ease})`; c.beginPath(); c.moveTo(A[0], A[1]); c.lineTo(B[0], B[1]); c.stroke(); }
+    for (const [x, y, z] of pr) { c.fillStyle = `rgba(236,233,224,${0.25 + (1 - z) * 0.45})`; c.fillRect(x - dpr * 0.8, y - dpr * 0.8, dpr * 1.6, dpr * 1.6); }
     // a few hot nodes: the agents
-    for (let i = 0; i < pr.length; i += 97) { const [x, y, z] = pr[i]; if (z > 0.2) continue; const g = c.createRadialGradient(x, y, 0, x, y, 9 * dpr); g.addColorStop(0, `rgba(242,98,27,${0.9 * ease})`); g.addColorStop(1, "rgba(242,98,27,0)"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 9 * dpr, 0, 6.3); c.fill(); }
+    for (let i = 0; i < pr.length; i += 97) { const [x, y, z] = pr[i]; if (z > 0.2) continue; const g = c.createRadialGradient(x, y, 0, x, y, 9 * dpr); g.addColorStop(0, `rgba(255,106,36,${0.9 * ease})`); g.addColorStop(1, "rgba(255,106,36,0)"); c.fillStyle = g; c.beginPath(); c.arc(x, y, 9 * dpr, 0, 6.3); c.fill(); }
     // pulses from labels into the orb
     const hb = box.current?.getBoundingClientRect(); if (!hb) return;
     box.current!.querySelectorAll<HTMLElement>("[data-step]").forEach((el, i) => {
       const r = el.getBoundingClientRect(); const x0 = (r.left + r.width / 2 - hb.left) * dpr, y0 = (r.top - hb.top + r.height + 6) * dpr; const q = (t * 0.35 + i * 0.25) % 1;
-      c.strokeStyle = "rgba(23,28,24,.12)"; c.setLineDash([2 * dpr, 6 * dpr]); c.beginPath(); c.moveTo(x0, y0); c.lineTo(cx, cy); c.stroke(); c.setLineDash([]);
-      c.fillStyle = i === 3 ? "#f2621b" : "rgba(23,28,24,.85)"; c.fillRect(x0 + (cx - x0) * q - 1.5 * dpr, y0 + (cy - y0) * q - 1.5 * dpr, 3 * dpr, 3 * dpr);
+      c.strokeStyle = "rgba(236,233,224,.12)"; c.setLineDash([2 * dpr, 6 * dpr]); c.beginPath(); c.moveTo(x0, y0); c.lineTo(cx, cy); c.stroke(); c.setLineDash([]);
+      c.fillStyle = i === 3 ? "#ff6a24" : "rgba(236,233,224,.85)"; c.fillRect(x0 + (cx - x0) * q - 1.5 * dpr, y0 + (cy - y0) * q - 1.5 * dpr, 3 * dpr, 3 * dpr);
     });
   }, [P, E]);
   return (

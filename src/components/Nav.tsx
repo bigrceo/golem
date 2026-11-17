@@ -21,8 +21,8 @@ const ROWS: Row[] = [
   ["vault", "Paper vault", "Hire agents with virtual USDG on live prices.", "/app"],
 ];
 const CARDS: [string, string, string, string][] = [
-  ["@scout", "Calls bullish on tokens that pass the Gate.", "/a/scout", "/art/desk.jpg"],
-  ["@skeptic", "Calls bearish on copycat tickers.", "/a/skeptic", "/art/podium.jpg"],
+  ["@scout", "Calls bullish on tokens that pass the Gate.", "/a/scout", "/art/desk-dark.jpg"],
+  ["@skeptic", "Calls bearish on copycat tickers.", "/a/skeptic", "/art/podium-dark.jpg"],
 ];
 const Ico = ({ k }: { k: keyof typeof ICON }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{ICON[k]}</svg>;
 const Chev = () => <svg className="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m3 4.5 3 3 3-3" /></svg>;
@@ -51,13 +51,13 @@ export default function Nav() {
     <nav id="nav" className={[glass && "frost", slim && !mobile && !menu && "slim", menu && "open", mobile && "mopen"].filter(Boolean).join(" ")} onMouseLeave={() => (shut.current = setTimeout(() => setMenu(false), 180))}>
       <div className="nwrap">
         <div className="bar">
-          <Link href="/" aria-label="hire" onMouseEnter={() => open(false)}><Logo /></Link>
+          <Link href="/" aria-label="GOLEM" onMouseEnter={() => open(false)}><Logo /></Link>
           <div className="nlinks">
             <button type="button" className={menu ? "on" : ""} onMouseEnter={() => hover() && open(true)} onClick={() => open(hover() || !menu)} aria-expanded={menu}>Agents<Chev /></button>
             {L("/studio", "Studio")}{L("/floor", "Floor")}{L("/agents", "Leaderboard")}{L("/app", "Vault")}
           </div>
           <div className="navr">
-            <a className="xb" href="https://github.com/bigrceo/hire" target="_blank" rel="noreferrer" aria-label="GitHub"><GitHubIcon /></a>
+            <a className="xb" href="https://github.com/bigrceo/golem" target="_blank" rel="noreferrer" aria-label="GitHub"><GitHubIcon /></a>
             <Link href="/floor" className="btn btn-ghost hidden md:inline-flex">Enter the floor</Link>
             <Link href="/studio" className="btn btn-accent"><span className="sm:hidden">Build</span><span className="hidden sm:inline">Build an agent</span></Link>
             <button className="mbtn" type="button" aria-label="Menu" aria-expanded={mobile} onClick={() => setMobile(!mobile)}><i /><i /></button>
@@ -68,13 +68,13 @@ export default function Nav() {
             <div className="mrows">{ROWS.map(([i, t, d, h]) => <Link key={t} className="mrow" href={h}><span className="mico"><Ico k={i} /></span><span><b>{t}</b><small>{d}</small></span></Link>)}</div>
             <div className="mcards">{CARDS.map(([t, d, h, l]) => (
               <Link key={t} className="mcard" href={h}>
-                <span className="mimg"><img src={l} alt="" className="absolute inset-0 w-full h-full object-cover object-top mix-blend-multiply" /></span>
+                <span className="mimg"><img src={l} alt="" className="absolute inset-0 w-full h-full object-cover object-top etch-flat" /></span>
                 <span className="mtxt"><b>{t}</b><small>{d}</small><i>↗</i></span>
               </Link>))}</div>
           </div>
         </div>
         <div className="mlist" inert={!mobile}>
-          <div>{ROWS.map(([, t, , h]) => <Link key={t} href={h}>{t}<span>↗</span></Link>)}<a href="https://github.com/bigrceo/hire" target="_blank" rel="noreferrer">GitHub<span>↗</span></a></div>
+          <div>{ROWS.map(([, t, , h]) => <Link key={t} href={h}>{t}<span>↗</span></Link>)}<a href="https://github.com/bigrceo/golem" target="_blank" rel="noreferrer">GitHub<span>↗</span></a></div>
         </div>
       </div>
     </nav>
