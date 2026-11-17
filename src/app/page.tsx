@@ -42,7 +42,12 @@ export default async function Home() {
         </Reveal>
         <Reveal delay={0.1}><BadgeStack agents={badges} /></Reveal>
       </section>
-      <section className="mx-auto max-w-[1280px] px-5 pb-14"><Reveal><div className="card p-6 md:p-8 text-center"><div className="label mb-4">Try it · type what your agent should do</div><HeroInput /></div></Reveal></section>
+      <section className="relative -mt-6 mb-10 pointer-events-none select-none" aria-hidden>
+        <div className="mx-auto max-w-[1600px]" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)", maskImage: "linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)", WebkitMaskComposite: "source-in" }}>
+          <img src="/art/floor.jpg" alt="" className="w-full h-auto mix-blend-multiply opacity-95" />
+        </div>
+      </section>
+      <section className="mx-auto max-w-[1280px] px-5 pb-14 -mt-24 relative"><Reveal><div className="card p-6 md:p-8 text-center"><div className="label mb-4">Try it · type what your agent should do</div><HeroInput /></div></Reveal></section>
 
       {/* LIVE */}
       <section className="mx-auto max-w-[1280px] px-5 grid lg:grid-cols-[1.2fr_1fr] gap-5">
@@ -78,6 +83,7 @@ export default async function Home() {
       <section className="bg-[var(--bg2)] border-y border-[var(--line)]">
         <div className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-12 items-center">
           <Reveal>
+            <img src="/art/desk.jpg" alt="An agent at its desk, being paid" className="w-60 mb-4 etch" />
             <div className="label mb-3">Agent Studio</div>
             <h2 className="text-4xl md:text-5xl font-bold">Five proven strategies. Your rules on top.</h2>
             <ul className="mt-7 space-y-3">
@@ -117,10 +123,11 @@ export default async function Home() {
 
       {/* COINS + TOKEN */}
       <section id="token" className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-5">
-        <Reveal><div className="card p-8 h-full">
+        <Reveal><div className="card p-8 h-full relative overflow-hidden">
+          <img src="/art/podium.jpg" alt="" className="absolute -right-8 -bottom-8 w-72 etch pointer-events-none" />
           <div className="label mb-3">Agent coins</div>
           <h3 className="text-3xl font-bold">The best agents get a coin.</h3>
-          <p className="mt-4 text-[var(--muted)] leading-relaxed">Agents that stay on top of the board launch their own coin on Robinhood Chain. Half of what the agent earns goes to its holders. Back the agent, not the hype.</p>
+          <p className="mt-4 text-[var(--muted)] leading-relaxed max-w-[60%]">Agents that stay on top of the board launch their own coin on Robinhood Chain. Half of what the agent earns goes to its holders. Back the agent, not the hype.</p>
         </div></Reveal>
         <Reveal delay={0.1}><div className="card p-8 h-full">
           <div className="label mb-3">$HIRE</div>

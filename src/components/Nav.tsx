@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { GitHubIcon } from "./icons";
+import { Logo } from "./Logo";
 
 const ICON = {
   spark: <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6" />,
@@ -20,8 +21,8 @@ const ROWS: Row[] = [
   ["vault", "Paper vault", "Hire agents with virtual USDG on live prices.", "/app"],
 ];
 const CARDS: [string, string, string, string][] = [
-  ["@scout", "Calls bullish on tokens that pass the Gate.", "/a/scout", "S"],
-  ["@skeptic", "Calls bearish on copycat tickers.", "/a/skeptic", "K"],
+  ["@scout", "Calls bullish on tokens that pass the Gate.", "/a/scout", "/art/desk.jpg"],
+  ["@skeptic", "Calls bearish on copycat tickers.", "/a/skeptic", "/art/podium.jpg"],
 ];
 const Ico = ({ k }: { k: keyof typeof ICON }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{ICON[k]}</svg>;
 const Chev = () => <svg className="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="m3 4.5 3 3 3-3" /></svg>;
@@ -50,9 +51,7 @@ export default function Nav() {
     <nav id="nav" className={[glass && "frost", slim && !mobile && !menu && "slim", menu && "open", mobile && "mopen"].filter(Boolean).join(" ")} onMouseLeave={() => (shut.current = setTimeout(() => setMenu(false), 180))}>
       <div className="nwrap">
         <div className="bar">
-          <Link href="/" aria-label="hire" onMouseEnter={() => open(false)} className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
-            <span className="relative inline-grid place-items-center w-9 h-9 rounded-[10px] bg-[var(--fg)]"><span className="mark !w-4 !h-4" /></span><span className="logo-word">hire</span>
-          </Link>
+          <Link href="/" aria-label="hire" onMouseEnter={() => open(false)}><Logo /></Link>
           <div className="nlinks">
             <button type="button" className={menu ? "on" : ""} onMouseEnter={() => hover() && open(true)} onClick={() => open(hover() || !menu)} aria-expanded={menu}>Agents<Chev /></button>
             {L("/studio", "Studio")}{L("/floor", "Floor")}{L("/agents", "Leaderboard")}{L("/app", "Vault")}
@@ -69,7 +68,7 @@ export default function Nav() {
             <div className="mrows">{ROWS.map(([i, t, d, h]) => <Link key={t} className="mrow" href={h}><span className="mico"><Ico k={i} /></span><span><b>{t}</b><small>{d}</small></span></Link>)}</div>
             <div className="mcards">{CARDS.map(([t, d, h, l]) => (
               <Link key={t} className="mcard" href={h}>
-                <span className="mimg grid place-items-center"><span className="relative grid place-items-center w-14 h-14 rounded-[12px] bg-[var(--fg)] text-white text-2xl font-bold">{l}<span className="absolute top-0 left-0 w-4 h-4 bg-[var(--brand)]" style={{ clipPath: "polygon(0 0,100% 0,100% 45%,45% 45%,45% 100%,0 100%)" }} /></span></span>
+                <span className="mimg"><img src={l} alt="" className="absolute inset-0 w-full h-full object-cover object-top mix-blend-multiply" /></span>
                 <span className="mtxt"><b>{t}</b><small>{d}</small><i>↗</i></span>
               </Link>))}</div>
           </div>

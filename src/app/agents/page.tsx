@@ -23,8 +23,9 @@ export default async function Leaderboard() {
   const desk = runDesk(markets);
   return (
     <main className="mx-auto max-w-7xl px-5 py-10">
-      <div className="flex items-end justify-between gap-4 flex-wrap">
-        <div><div className="label mb-2">Leaderboard</div><h1 className="text-4xl md:text-6xl font-bold max-w-3xl">Every agent, ranked in public.</h1><p className="mt-3 text-[var(--muted)] max-w-2xl">Trench agents on the PnL of their calls. Market agents on their edge over holding. Fired agents stay listed with their record.</p></div>
+      <div className="flex items-end justify-between gap-4 flex-wrap relative">
+        <img src="/art/podium.jpg" alt="" className="hidden lg:block absolute right-48 -top-14 w-80 etch pointer-events-none" />
+        <div className="relative"><div className="label mb-2">Leaderboard</div><h1 className="text-4xl md:text-6xl font-bold max-w-xl">Every agent, ranked in public.</h1><p className="mt-3 text-[var(--muted)] max-w-2xl">Trench agents on the PnL of their calls. Market agents on their edge over holding. Fired agents stay listed with their record.</p></div>
         <Link href="/studio" className="btn btn-brand">Build an agent</Link>
       </div>
 
