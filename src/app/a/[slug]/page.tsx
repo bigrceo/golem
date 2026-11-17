@@ -95,7 +95,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
             <div className="mt-3 text-sm text-[var(--muted)] num">{rec.backtest.trades} trades · {rec.backtest.winRate}% winners · live for {rec.liveHours}h</div></div>
           <div className="card p-6"><div className="label">Decision log since launch</div>
             <div className="mt-3 divide-y divide-[var(--line)]">
-              {rec.live.decisions.slice(0, 14).map((x, i) => <div key={i} className="py-2.5 flex gap-3 text-sm"><span className="text-[var(--muted)] num w-12 shrink-0">{hhmm(x.t)}</span><span className={`font-bold w-12 shrink-0 ${x.action === "BUY" ? "up" : x.action === "HOLD" ? "text-[var(--muted)]" : "down"}`}>{x.action}</span><span>{x.reason}</span></div>)}
+              {rec.live.decisions.slice(0, 14).map((x, i) => <div key={i} className="py-2.5 flex gap-3 text-sm"><span className="text-[var(--muted)] num w-12 shrink-0">{hhmm(x.t)}</span><span className={`font-bold w-12 shrink-0 ${x.action === "BUY" ? "up" : x.action === "SELL" ? "down" : "text-[var(--muted)]"}`}>{x.action}</span><span>{x.reason}</span></div>)}
               {!rec.live.decisions.length && <p className="py-3 text-sm text-[var(--muted)]">First decision at the next hourly candle.</p>}
             </div></div>
         </div>

@@ -173,9 +173,9 @@ export default function Studio() {
                   <Spark data={bt.holdCurve} w={600} h={110} color="#4a4945" fill={false} />
                   <div className="absolute inset-0"><Spark data={bt.curve} w={600} h={110} color={bt.edge >= 0 ? "var(--up)" : "var(--down)"} /></div>
                 </div>
-                <div className="mt-2 flex gap-5 text-xs text-[var(--muted)]"><span><span className="inline-block w-3 h-0.5 bg-[var(--up)] align-middle mr-1" />agent</span><span><span className="inline-block w-3 h-0.5 bg-[#4a4945] align-middle mr-1" />holding</span><span>{bt.trades} trades · {bt.winRate}% winners{bt.fired ? " · would have been fired" : ""}</span></div>
+                <div className="mt-2 flex gap-5 text-xs text-[var(--muted)]"><span><span className="inline-block w-3 h-0.5 bg-[var(--up)] align-middle mr-1" />agent</span><span><span className="inline-block w-3 h-0.5 bg-[#4a4945] align-middle mr-1" />holding</span><span>{bt.trades} trades · {bt.winRate}% winners{bt.fired ? " · stopped at its safety line" : ""}</span></div>
                 <div className="mt-5 divide-y divide-[var(--line)]">
-                  {bt.decisions.slice(0, 5).map((d, i) => <div key={i} className="py-2 flex gap-3 text-sm"><span className={`font-bold w-12 shrink-0 ${d.action === "BUY" ? "up" : d.action === "HOLD" ? "text-[var(--muted)]" : "down"}`}>{d.action}</span><span className="truncate">{d.reason}</span></div>)}
+                  {bt.decisions.slice(0, 5).map((d, i) => <div key={i} className="py-2 flex gap-3 text-sm"><span className={`font-bold w-12 shrink-0 ${d.action === "BUY" ? "up" : d.action === "SELL" ? "down" : "text-[var(--muted)]"}`}>{d.action}</span><span className="truncate">{d.reason}</span></div>)}
                 </div>
               </>}
             </div>
