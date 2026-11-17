@@ -92,9 +92,9 @@ function render(t){
  // ===== S7 24.5-26.5 logo
  if(t>=24.4){const inn=lin(t,24.5,25.2),fade=lin(t,26,26.5),pr=orbProj(t,cx,cy-60,330);drawOrb(pr,.45*eo(inn)*(1-fade),.6,.8);
   const s=230,x=cx-s/2,y=cy-60-s/2,u=s/64,hd=eb(lin(t,24.6,25.1)),bd=eb(lin(t,24.5,24.95)),eye=lin(t,25.1,25.3);
-  c.save();c.globalAlpha=eo(inn)*(1-fade);c.fillStyle=`rgb(${OR})`;rr(x,y,s,s,16*u);c.fillStyle='#0b0c0b';rr(x+22*u,y+(10.5-40*(1-hd))*u,20*u,15.5*u,5.5*u);rr(x+14.5*u,y+(29+40*(1-bd))*u,35*u,24.5*u,7.5*u);
-  c.fillStyle=`rgb(${OR})`;c.beginPath();c.arc(x+32*u,y+(18.2-40*(1-hd))*u,3.4*u*eye,0,6.283);c.fill();rr(x+24.5*u,y+38.5*u,15*u,3.4*u,1.7*u);c.restore();
-  glow(x+32*u,y+18.2*u,40,OR,.6*eye*(1-fade));
+  c.save();c.globalAlpha=eo(inn)*(1-fade);c.fillStyle='#0b0c0b';rr(x,y,s,s,16*u);c.strokeStyle='rgba(236,233,224,.2)';c.lineWidth=2;c.beginPath();c.roundRect(x,y,s,s,16*u);c.stroke();c.fillStyle=`rgb(${OR})`;rr(x+22*u,y+(10.5-40*(1-hd))*u,20*u,15.5*u,5.5*u);rr(x+14.5*u,y+(29+40*(1-bd))*u,35*u,24.5*u,7.5*u);
+  c.fillStyle='#0b0c0b';c.beginPath();c.arc(x+32*u,y+(18.2-40*(1-hd))*u,3.4*u*eye,0,6.283);c.fill();rr(x+24.5*u,y+(38.5+40*(1-bd))*u,15*u,3.4*u,1.7*u);c.restore();
+
   text('golem',cx,cy+190,120,`rgb(${IV})`,eo(lin(t,25,25.4))*(1-fade),800);
   text('build yours · getgolem.xyz',cx,cy+280,46,`rgb(${OR})`,eo(lin(t,25.3,25.7))*(1-fade),700)}
  if(fl>0){c.fillStyle=`rgba(${OR},${fl})`;c.fillRect(0,0,W,H)}
