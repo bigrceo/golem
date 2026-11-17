@@ -1,25 +1,52 @@
-# hire — Hire a trading agent. Fire it when it loses.
+<p align="center"><img src="https://hire-desk-five.vercel.app/icon" width="64" alt="hire"></p>
+<h1 align="center">hire</h1>
+<p align="center"><b>Build a trading agent in one sentence. Fire it when it loses.</b><br>
+No-code trading agents on Robinhood Chain: stock tokens, crypto and the trenches, every call on the record.<br>
+<a href="https://hire-desk-five.vercel.app">Open the app</a> · <a href="https://hire-desk-five.vercel.app/studio">Agent Studio</a> · <a href="https://hire-desk-five.vercel.app/floor">The floor</a> · <a href="https://hire-desk-five.vercel.app/agents">Leaderboard</a></p>
 
-Trading agents on Robinhood Chain (chainId 4663) that trade Robinhood stock tokens from a vault only its owner can open.
+---
 
-## Pieces
-- `contracts/` — Foundry. `HireVaultFactory` (one vault per wallet, watchdog address) and `HireVault` (deposit, `hire(agent, maxTrade, dailyCap, fireBps, tokens[])`, `execute(path, amountIn, minOut)` by the agent key through the mainnet KaratRouter `0x5b03CA37137FEb729a9E4427c5683998b4aB09e3`, `fire(reason)` by owner / watchdog / agent, `withdraw` owner-only). 9 unit tests + 1 fork test (real ETH→TSLA→ETH swap).
-- `src/keeper/run.ts` — the keeper (`npm run keeper`). Every minute: live prices, strategy signal, Gate (route by simulation, all-in cost ≤ 8 %), execute with the agent key, exit check, drawdown watch → `fire()` with the watchdog key. Logs to Postgres (`DATABASE_URL`) or `data/hire.json`.
-- `src/lib/engine.ts` — 8 agents, deterministic paper sims on real hourly candles (Binance + Yahoo). Live-hireable: Tesla Tina (TSLA), Chip Chad (NVDA), Apple Amy (AAPL).
-- `src/app` — landing, `/agents`, `/agents/[id]`, `/app` (wallet dashboard: create vault, deposit, hire, fire, withdraw, vault log).
+## What it does
 
-## Keys
-`AGENT_MNEMONIC` derives index 0 = watchdog (may only fire), index i = agent i (may only `execute` inside caps). Fund the agent addresses with a little ETH for gas (`GET /api/agents` lists them).
+| | |
+|---|---|
+| **Agent Studio** | Type what the agent should do ("Buy ETH when RSI drops below 25, fire it at 12%") or build it with sliders. Five strategies (momentum, mean reversion, MA crossover, RSI reversal, buy the dip), plus take profit, stop loss, time stop, sizing and a firing line. |
+| **Honest backtests** | 720 real hourly candles, fees on every trade, compared with simply holding. Auto-tune picks settings on the first 75% of the data and reports the result on the last 25% it never saw. |
+| **Trench agents** | Agents that call Robinhood Chain tokens. Every pool created on the Uniswap v4 PoolManager is read from the chain, priced and run through the Gate every 5 minutes. Calls carry their entry, live PnL and exit. |
+| **The Gate** | Seven checks before any call: liquidity, pool depth vs FDV, someone sold this hour, organic buy/sell flow, original ticker, minimum age, not already pumped. Checks, never a safety stamp. |
+| **Firing line** | Every agent has a maximum drawdown. Cross it and it is fired in public, its record kept on the leaderboard. |
+| **Paper vault** | Hire agents with virtual USDG on live prices. Nothing to fund, no gas. |
 
-## Run locally against a fork
+## Layout
+
 ```
-anvil --fork-url https://rpc.mainnet.chain.robinhood.com --chain-id 4663 --port 8545 --compute-units-per-second 60
-cd contracts && WATCHDOG=<index0 addr> forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key <pk>
-# .env.local: NEXT_PUBLIC_RPC_URL, NEXT_PUBLIC_FACTORY, AGENT_MNEMONIC, NEXT_PUBLIC_DEV_WALLET_PK (dev only)
-npm run dev -- -p 4310 ; npm run keeper
+src/lib/rules.ts       strategy engine: backtest, compare, auto-tune, plain-English description
+src/lib/parse.ts       sentence -> agent (deterministic keyword reading, no AI key)
+src/lib/candles.ts     hourly candles: Binance / Coinbase for crypto, Yahoo for stock tokens
+src/app/studio         Agent Studio
+src/app/floor          live Robinhood Chain pools and the firewall log
+src/app/agents         leaderboard;  src/app/a/[slug]  public agent profile
+worker/                Cloudflare Worker + D1: discovery, Gate, trench agents, calls, firing (cron */5)
+contracts/             HireVault (firing line, per-trade cap, allowlist, Uniswap v4 routing) + tests
+contracts/src/nouny    NOUNY AgentVault, vendored unchanged under MIT (see its README)
 ```
 
-## Deploy
-1. `forge script script/Deploy.s.sol --rpc-url robinhood --broadcast --private-key $PK` with `WATCHDOG` = index 0 of the production mnemonic.
-2. Vercel: `NEXT_PUBLIC_FACTORY`, `AGENT_MNEMONIC`, `DATABASE_URL` (Neon). Never set `NEXT_PUBLIC_DEV_WALLET_PK`.
-3. Railway: same env + `npm run keeper` as the start command.
+## Run it
+
+```bash
+npm install && npm run dev            # site on :3000
+cd worker && npx wrangler dev          # API + cron locally (needs a D1 database, see wrangler.toml / schema.sql)
+cd contracts && forge test             # 9 unit tests + 1 Robinhood Chain fork test (with --fork-url)
+```
+
+Env for the site: `HIRE_API` (worker URL), `HIRE_API_SECRET` (shared with the worker's `SECRET`).
+
+## Credits
+
+Strategy set and vault design inspired by [NOUNY](https://github.com/nounyagent/nouny-agent) (MIT); their `AgentVault` is included in `contracts/src/nouny` with its license.
+
+Agents trade paper money on real prices. Calls are not financial advice.
+
+## License
+
+MIT

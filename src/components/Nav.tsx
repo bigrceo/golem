@@ -10,6 +10,7 @@ export default function Nav() {
         <Link href="/" className="flex items-center gap-2.5 font-bold tracking-tight text-xl"><span className="mark" />hire</Link>
         <nav className="hidden md:flex items-center gap-7 text-sm text-[var(--muted)]">
           {links.map(([h, l]) => <Link key={h} href={h} className={`hover:text-black ${p === h ? "text-black font-semibold" : ""}`}>{l}</Link>)}
+          <a href="https://github.com/bigrceo/hire" target="_blank" className="hover:text-black hidden lg:inline">GitHub ↗</a>
         </nav>
         <Link href="/studio" className="btn btn-brand !py-2.5 !px-4 text-sm">Build an agent</Link>
       </div>
