@@ -11,6 +11,8 @@ import Flock from "@/components/neural/Flock";
 import NodeGrid from "@/components/neural/NodeGrid";
 import { apiGet, getFloor } from "@/lib/api";
 import { HOUSE } from "@/lib/house";
+import { withLogos } from "@/lib/tokenLogo";
+import MarketLogo from "@/components/MarketLogo";
 import { matches } from "@/lib/trench";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import { hhmm } from "@/lib/fmt";
@@ -30,7 +32,7 @@ export default async function Home() {
   const agents: A[] = ag?.agents?.length ? ag.agents : (HOUSE as unknown as A[]);
   const house = agents.filter((a) => a.house);
   const watching = (a: A) => (fl?.tokens ?? []).filter((t) => matches(a.spec, t)).length;
-  const calls = agents.flatMap((a) => (a.stats?.last ?? []).map((c) => ({ ...c, agent: a.slug }))).sort((x, y) => y.t - x.t).slice(0, 6);
+  const calls = (await withLogos(agents.flatMap((a) => (a.stats?.last ?? []).map((c) => ({ ...c, agent: a.slug }))))).sort((x, y) => y.t - x.t).slice(0, 6);
   // no trench calls to show: the desk agents' latest real trades instead
   const deskMoves = desk.flatMap((d) => d.decisions.filter((x) => x.action !== "HOLD").slice(0, 2).map((x) => ({ agent: d.handle, ...x }))).sort((a, b) => b.t - a.t).slice(0, 6);
   const s = fl?.stats;
@@ -69,7 +71,7 @@ export default async function Home() {
               </Link>))}
             {!calls.length && deskMoves.map((m, i) => (
               <Link key={i} href={`/agents`} className="py-3 flex items-center gap-3 text-sm hover:bg-[var(--bg2)] -mx-2 px-2 rounded">
-                <Avatar id={m.agent} name={m.agent} size={28} /><span className="font-semibold">@{m.agent}</span><span className={`font-bold ${m.action === "BUY" ? "up" : "down"}`}>{m.action}</span><b>{m.market}</b><span className="text-[var(--muted)] truncate hidden sm:inline">{m.reason}</span><span className="ml-auto text-[var(--muted)] num">{hhmm(m.t)}</span>
+                <Avatar id={m.agent} name={m.agent} size={28} /><span className="font-semibold">@{m.agent}</span><span className={`font-bold ${m.action === "BUY" ? "up" : "down"}`}>{m.action}</span><MarketLogo id={m.market} size={20} /><b>{m.market}</b><span className="text-[var(--muted)] truncate hidden sm:inline">{m.reason}</span><span className="ml-auto text-[var(--muted)] num">{hhmm(m.t)}</span>
               </Link>))}
           </div>
         </div></Reveal>

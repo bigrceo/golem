@@ -3,12 +3,14 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { apiGet, getFloor } from "@/lib/api";
 import { HOUSE } from "@/lib/house";
+import { withLogos } from "@/lib/tokenLogo";
 import { matches } from "@/lib/trench";
 import { marketRecord } from "@/lib/live";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import type { Spec } from "@/lib/rules";
 import Avatar from "@/components/Avatar";
 import TokenLogo from "@/components/TokenLogo";
+import MarketLogo from "@/components/MarketLogo";
 import Spark from "@/components/Spark";
 import { hhmm } from "@/lib/fmt";
 
@@ -29,6 +31,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
   const d = (await apiGet<Resp>(`/agents/${slug}`, 60)) ?? ((): Resp | null => { const h = HOUSE.find((x) => x.slug === slug); return h ? ({ agent: { ...h, owner: "golem", fire_reason: null } } as unknown as Resp) : null; })();
   if (!d) notFound();
   const fl = d.agent.kind === "trench" ? await getFloor() : null;
+  if (d.calls?.length) d.calls = await withLogos(d.calls);
   const live = fl ? fl.tokens.filter((t) => matches(d.agent.spec, t)).slice(0, 10) : [];
   const a = d.agent; const fired = !!a.fired_at;
   const rec = a.kind === "market" ? await marketRecord(a.spec, a.created_at) : null;
@@ -40,7 +43,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
         <Avatar id={a.slug} name={a.name} size={64} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap"><h1 className="text-4xl font-bold">@{a.slug}</h1>{a.house ? <span className="label !text-[var(--brand)]">House agent</span> : null}<span className={`label ${fired || liveFired ? "down" : "up"}`}>{fired || liveFired ? "Paused" : "Working"}</span></div>
-          <div className="text-[var(--muted)]">{a.kind === "trench" ? `Trenches · ${a.spec.side === "bear" ? "bearish" : "bullish"} calls on Robinhood Chain tokens` : `Markets · ${a.spec.market}`} · launched {ago(a.created_at)}</div>
+          <div className="text-[var(--muted)] flex items-center gap-2">{a.kind === "market" && <MarketLogo id={a.spec.market} size={18} />}{a.kind === "trench" ? `Trenches · ${a.spec.side === "bear" ? "bearish" : "bullish"} calls on Robinhood Chain tokens` : `Markets · ${a.spec.market}`} · launched {ago(a.created_at)}</div>
         </div>
         <Link href="/studio" className="btn btn-brand">Build your own</Link>
       </div>

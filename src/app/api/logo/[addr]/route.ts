@@ -32,7 +32,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ addr: st
       if (src.startsWith("ipfs://")) {
         const cid = src.slice(7);
         for (const g of GATEWAYS) { const r = await fetch(g + cid, { next: { revalidate: 86400 } }).catch(() => null); if (r?.ok && (r.headers.get("content-type") ?? "").startsWith("image")) return new NextResponse(await r.arrayBuffer(), { headers: { "content-type": r.headers.get("content-type")!, ...cache } }); }
-      } else if (src.startsWith("http")) return NextResponse.redirect(src, { headers: cache });
+      } else if (src.startsWith("http")) { const r = await fetch(src, { next: { revalidate: 86400 } }).catch(() => null); if (r?.ok && (r.headers.get("content-type") ?? "").startsWith("image")) return new NextResponse(await r.arrayBuffer(), { headers: { "content-type": r.headers.get("content-type")!, ...cache } }); }
     }
   }
   if (/^https:\/\/(dd\.dexscreener\.com|cdn\.dexscreener\.com)\//.test(fb)) return NextResponse.redirect(fb, { headers: cache });

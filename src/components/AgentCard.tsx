@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AgentResult } from "@/lib/engine";
 import Spark from "./Spark";
 import Avatar from "./Avatar";
+import MarketLogo from "./MarketLogo";
 import { money, signed } from "@/lib/fmt";
 
 export default function AgentCard({ a, rank }: { a: AgentResult; rank?: number }) {
@@ -14,7 +15,7 @@ export default function AgentCard({ a, rank }: { a: AgentResult; rank?: number }
           <Avatar id={a.id} name={a.name} size={40} />
           <div>
             <div className="font-bold leading-tight">{a.name}</div>
-            <div className="text-xs text-[var(--muted)]">{a.strategy} · {a.markets.join("/")}</div>
+            <div className="text-xs text-[var(--muted)] flex items-center gap-1.5">{a.markets.map((m) => <MarketLogo key={m} id={m} size={14} />)}{a.strategy} · {a.markets.join("/")}</div>
           </div>
         </div>
         <div className={`label !tracking-[0.12em] ${fired ? "text-[var(--muted)]" : "up"}`}>{fired ? "Paused" : "Working"}</div>

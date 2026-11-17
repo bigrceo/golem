@@ -6,6 +6,7 @@ import { TRENCH_DEFAULT, matches, describeTrench, k, type Trench, type FloorToke
 import Spark from "./Spark";
 import NeuralOrb from "./neural/NeuralOrb";
 import TokenLogo from "./TokenLogo";
+import MarketLogo from "./MarketLogo";
 
 const MARKETS = ["BTC", "ETH", "SOL", "TSLA", "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "COIN", "SPY", "QQQ"];
 const EXAMPLES = [
@@ -95,7 +96,7 @@ export default function Studio() {
             <>
               <div>
                 <div className="label mb-3">Market</div>
-                <div className="flex flex-wrap gap-2">{MARKETS.map((m) => <button key={m} onClick={() => setSpec({ ...spec, market: m })} className={`btn !py-1.5 !px-3 text-sm ${spec.market === m ? "btn-brand" : "btn-ghost"}`}>{m}</button>)}</div>
+                <div className="flex flex-wrap gap-2">{MARKETS.map((m) => <button key={m} onClick={() => setSpec({ ...spec, market: m })} className={`btn !py-1.5 !px-3 text-sm ${spec.market === m ? "btn-brand" : "btn-ghost"}`}><MarketLogo id={m} size={18} />{m}</button>)}</div>
               </div>
               <div>
                 <div className="label mb-3">Strategy</div>

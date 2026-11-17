@@ -5,6 +5,7 @@ import { AGENTS } from "@/lib/engine";
 import { money, signed, hhmm } from "@/lib/fmt";
 import Spark from "./Spark";
 import Avatar from "./Avatar";
+import MarketLogo from "./MarketLogo";
 
 type Hire = { id: string; agentId: string; since: number; cash: number; fireAt: number; firedAt?: number; finalEquity?: number; firedReason?: string };
 type Vault = { createdAt: number; deposit: number; hires: Hire[] };
@@ -156,7 +157,7 @@ export default function Dashboard() {
           <div className="mt-4 grid grid-cols-2 gap-2">
             {AGENTS.map((a) => (
               <button key={a.id} onClick={() => { setAgentId(a.id); setLine(Math.round(a.fireAt * 100)); }} className={`text-left card-soft p-3 flex items-center gap-2.5 ${agentId === a.id ? "!border-[var(--brand)] !bg-[var(--bg2)]" : ""}`}>
-                <Avatar id={a.id} name={a.name} size={28} /><span className="min-w-0"><span className="block font-bold text-sm truncate">{a.name}</span><span className="block text-xs text-[var(--muted)]">{a.markets.join("/")}</span></span>
+                <Avatar id={a.id} name={a.name} size={28} /><span className="min-w-0"><span className="block font-bold text-sm truncate">{a.name}</span><span className="flex items-center gap-1 text-xs text-[var(--muted)]">{a.markets.map((m) => <MarketLogo key={m} id={m} size={13} />)}{a.markets.join("/")}</span></span>
               </button>
             ))}
           </div>

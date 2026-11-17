@@ -6,6 +6,7 @@ import { marketRecord } from "@/lib/live";
 import { describeTrench, type Trench } from "@/lib/trench";
 import type { Spec } from "@/lib/rules";
 import Avatar from "@/components/Avatar";
+import MarketLogo from "@/components/MarketLogo";
 import Spark from "@/components/Spark";
 import AgentCard from "@/components/AgentCard";
 import { loadMarkets } from "@/lib/market";
@@ -48,7 +49,7 @@ export default async function Leaderboard() {
       {!mk.length ? null : (
         <div className="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4">{mk.map(({ a, r }, i) => (
           <Link key={a.slug} href={`/a/${a.slug}`} className="card p-5 hover:border-[var(--brand)]">
-            <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "down" : "up"}`}>{r.live.fired ? "Paused" : "Working"}</span></div>
+            <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate flex items-center gap-1.5"><MarketLogo id={a.spec.market} size={14} />{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "down" : "up"}`}>{r.live.fired ? "Paused" : "Working"}</span></div>
             <div className="mt-4 flex items-end justify-between"><div><div className="text-xs text-[var(--muted)]">30-day edge</div><div className={`text-2xl font-bold num ${r.backtest.edge >= 0 ? "up" : "down"}`}>{sgn(r.backtest.edge)}</div><div className="text-xs text-[var(--muted)] num">live {sgn(r.live.ret)}</div></div><div className="w-28"><Spark data={r.backtest.curve} w={112} h={36} color={r.backtest.edge >= 0 ? "var(--up)" : "var(--down)"} /></div></div>
           </Link>))}</div>)}
 
