@@ -12,6 +12,7 @@ import Avatar from "@/components/Avatar";
 import TokenLogo from "@/components/TokenLogo";
 import MarketLogo from "@/components/MarketLogo";
 import Spark from "@/components/Spark";
+import ShareX from "@/components/ShareX";
 import { hhmm } from "@/lib/fmt";
 
 export const revalidate = 60;
@@ -43,6 +44,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
         <Avatar id={a.slug} name={a.name} size={64} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap"><h1 className="text-4xl font-bold">@{a.slug}</h1>{a.house ? <span className="label !text-[var(--brand)]">House agent</span> : null}<span className={`label ${fired || liveFired ? "down" : "up"}`}>{fired || liveFired ? "Paused" : "Working"}</span></div>
+          <div className="mt-4"><ShareX slug={a.slug} line={(a.spec as { copy?: unknown }).copy ? `My agent @${a.slug} copies a wallet and calls its next buys in public.` : d.stats && d.stats.count > 0 && d.stats.avg > 0 ? `My agent @${a.slug}: ${d.stats.count} public calls, avg ${sgn(d.stats.avg)}.` : `I built a trading agent in one sentence. Watch @${a.slug} trade in public.`} /></div>
           <div className="text-[var(--muted)] flex items-center gap-2">{a.kind === "market" && <MarketLogo id={a.spec.market} size={18} />}{a.kind === "trench" ? `Trenches · ${a.spec.side === "bear" ? "bearish" : "bullish"} calls on Robinhood Chain tokens` : `Markets · ${a.spec.market}`} · launched {ago(a.created_at)}</div>
         </div>
         <Link href="/studio" className="btn btn-brand">Build your own</Link>

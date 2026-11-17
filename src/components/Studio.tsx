@@ -64,13 +64,13 @@ export default function Studio() {
     setErr(null); setLaunching(true);
     const r = await fetch("/api/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, kind: universe, spec: universe === "market" ? spec : trench }) }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
     setLaunching(false);
-    if (r.ok) router.push(`/a/${r.slug}`); else setErr(r.error ?? "Could not launch");
+    if (r.ok) router.push(`/a/${r.slug}?new=1`); else setErr(r.error ?? "Could not launch");
   };
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-10">
       <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4 items-center"><div><div className="label mb-2">Agent Studio · no code</div>
-      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Say what it should do. Watch it trade.</h1></div><NeuralOrb className="hidden lg:block h-64" /></div>
+      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Say what it should do. Watch it trade.</h1><a href="/copy" className="mt-4 inline-block text-[var(--brand)] font-semibold">Or copy any wallet →</a></div><NeuralOrb className="hidden lg:block h-64" /></div>
 
       {/* SENTENCE */}
       <div className="mt-8 card p-2 flex flex-col md:flex-row gap-2">

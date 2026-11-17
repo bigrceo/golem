@@ -21,6 +21,11 @@ export async function POST(req: Request) {
     spec = { universe: "trenches", side: s.side === "bear" ? "bear" : "bull", maxAgeH: clamp(s.maxAgeH, 1, 72, 24), minLiq: clamp(s.minLiq, 1000, 1e7, 5000), minFdv: clamp(s.minFdv, 1000, 1e8, 10000), maxFdv: clamp(s.maxFdv, 5000, 1e9, 300000),
       minBuysH1: clamp(s.minBuysH1, 0, 5000, 20), minBuyRatio: clamp(s.minBuyRatio, 0, 20, 1.2), minChH1: clamp(s.minChH1, -100, 1000, 0), maxChH1: clamp(s.maxChH1, -100, 10000, 200), minChM5: clamp(s.minChM5, -100, 100, -100), copycatsOnly: !!s.copycatsOnly,
       tp: clamp(s.tp, 5, 500, 50), sl: clamp(s.sl, 5, 90, 25), maxHold: clamp(s.maxHold, 1, 72, 12), fireLine: clamp(s.fireLine, 5, 60, 25) };
+  } else if (b?.kind === "copy") {
+    const w = String((b.spec as unknown as { wallet?: string })?.wallet ?? "").toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(w)) return NextResponse.json({ error: "Paste a wallet address (0x…)." }, { status: 400 });
+    spec = { universe: "trenches", side: "bull", copy: { wallet: w }, maxAgeH: 72, minLiq: 3000, minFdv: 1000, maxFdv: 1e9, minBuysH1: 0, minBuyRatio: 0, minChH1: -100, maxChH1: 10000, minChM5: -100, tp: clamp((b.spec as Trench)?.tp, 5, 500, 50), sl: clamp((b.spec as Trench)?.sl, 5, 90, 30), maxHold: 24, fireLine: 30 };
+    b.kind = "trench";
   } else return NextResponse.json({ error: "bad kind" }, { status: 400 });
   const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 18) || "agent";
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();

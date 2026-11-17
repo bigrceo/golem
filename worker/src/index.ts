@@ -135,7 +135,22 @@ async function runAgents(env: Env, toks: Tok[], big: Map<string, number>) {
   const recent = (await env.DB.prepare("select agent, token from calls where t > ?").bind(now - 24 * H).all<{ agent: string; token: string }>()).results;
   const called = new Set(recent.map((r) => r.agent + ":" + r.token));
   for (const a of agents) {
-    const s = JSON.parse(a.spec) as Trench; let made = 0;
+    const s = JSON.parse(a.spec) as Trench & { copy?: { wallet: string; from?: number } }; let made = 0;
+    if (s.copy) {
+      // copy agent: call what the wallet just bought, if it passes the Gate
+      const r = await fetch(`${env.WEB}/api/wallet-buys?w=${s.copy.wallet}${s.copy.from ? `&from=${s.copy.from}` : ""}`, { headers: { "x-hire-secret": env.SECRET } }).then((x) => (x.ok ? x.json() : null)).catch(() => null) as { next: number; tokens: string[] } | null;
+      if (!r) continue;
+      stmts.push(env.DB.prepare("update agents set spec=? where slug=?").bind(JSON.stringify({ ...s, copy: { ...s.copy, from: r.next } }), a.slug));
+      for (const tok of r.tokens) {
+        const t = byToken.get(tok); if (!t || !t.price || called.has(a.slug + ":" + tok)) continue;
+        called.add(a.slug + ":" + tok);
+        if (!t.passed) { stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 0, ?)").bind(a.slug, tok, t.symbol, now, "Wallet bought it, Gate held it back")); continue; }
+        const reason = `Copied: the wallet just bought $${t.symbol}. Gate passed, $${short(t.fdv)} FDV, $${short(t.liq)} liquidity.`;
+        stmts.push(env.DB.prepare("insert into calls (agent, token, symbol, side, entry_price, entry_fdv, t, reason) values (?, ?, ?, 'bull', ?, ?, ?, ?)").bind(a.slug, tok, t.symbol, t.price, t.fdv, now, reason));
+        stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 1, ?)").bind(a.slug, tok, t.symbol, now, reason));
+      }
+      continue;
+    }
     const cands = toks.filter((t) => t.price > 0 && t.created >= now - s.maxAgeH * H && t.liq >= s.minLiq && t.fdv >= s.minFdv && t.fdv <= s.maxFdv && t.buys_h1 >= s.minBuysH1
       && (t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1) >= s.minBuyRatio && t.ch_h1 >= s.minChH1 && t.ch_h1 <= s.maxChH1 && t.ch_m5 >= s.minChM5)
       .sort((x, y) => y.vol_h24 - x.vol_h24);
