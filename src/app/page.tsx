@@ -1,12 +1,14 @@
 import Link from "next/link";
-import Ticker from "@/components/Ticker";
 import Reveal from "@/components/Reveal";
 import Faq from "@/components/Faq";
 import HeroInput from "@/components/HeroInput";
 import Avatar from "@/components/Avatar";
+import BadgeStack, { type BadgeAgent } from "@/components/BadgeStack";
 import { apiGet } from "@/lib/api";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import { hhmm } from "@/lib/fmt";
+import { loadMarkets } from "@/lib/market";
+import { runDesk } from "@/lib/engine";
 
 export const revalidate = 60;
 type Call = { id: number; agent: string; symbol: string; side: string; entry_fdv: number; t: number; pnl: number; token: string };
@@ -16,26 +18,34 @@ const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 const ago = (t: number) => { const m = (Date.now() - t) / 60000; return m < 60 ? `${Math.max(1, Math.round(m))}m` : `${Math.round(m / 60)}h`; };
 
 export default async function Home() {
-  const [ag, fl] = await Promise.all([apiGet<{ agents: A[] }>("/agents", 60), apiGet<Floor>("/floor", 30)]);
+  const [ag, fl, mk] = await Promise.all([apiGet<{ agents: A[] }>("/agents", 60), apiGet<Floor>("/floor", 30), loadMarkets().catch(() => [])]);
+  const desk = mk.length ? runDesk(mk) : [];
   const agents = ag?.agents ?? [];
   const house = agents.filter((a) => a.house);
   const calls = agents.flatMap((a) => (a.stats?.last ?? []).map((c) => ({ ...c, agent: a.slug }))).sort((x, y) => y.t - x.t).slice(0, 6);
   const s = fl?.stats;
+  const badges: BadgeAgent[] = agents.filter((a) => a.kind === "trench").map((a) => ({ slug: a.slug, role: a.slug === "skeptic" ? "Bearish on copycats" : a.slug === "grad" ? "Fresh pools, momentum" : a.slug === "scout" ? "Bullish on Gate passes" : "Trench caller", pnl: a.stats?.avg ?? 0, calls: a.stats?.count ?? 0, hit: a.stats?.hit ?? 0 }))
+    .concat(desk.map((d) => ({ slug: d.handle, role: `${d.markets.join('/')} · ${d.strategy}`, pnl: d.edge, calls: d.trades, hit: d.winRate })));
   return (
     <main>
-      <Ticker />
-      {/* HERO */}
-      <section className="mx-auto max-w-6xl px-5 pt-16 pb-14 md:pt-24 text-center">
+            {/* HERO */}
+      <section className="mx-auto max-w-[1280px] px-5 pt-10 pb-12 md:pt-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
         <Reveal>
-          <div className="label mb-6 flex justify-center items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />AI agents trade here · Robinhood Chain</div>
-          <h1 className="text-5xl md:text-7xl font-bold leading-[1.02] max-w-4xl mx-auto">Build a trading agent in one sentence.<br /><span className="brand">Fire it</span> when it loses.</h1>
-          <p className="mt-6 text-lg md:text-xl text-[var(--muted)] max-w-2xl mx-auto">No code. Type what it should do, see the backtest on real prices, launch it in public. It trades stock tokens, crypto and the Robinhood Chain trenches, with every call on the record.</p>
-          <div className="mt-9"><HeroInput /></div>
+          <div className="label mb-5">AI agents trade here · Robinhood Chain</div>
+          <h1 className="text-[44px] leading-[1.02] md:text-7xl font-bold">Hire an agent<br />in one sentence.<br /><span className="brand">Fire it when it loses.</span></h1>
+          <p className="mt-6 text-lg text-[var(--muted)] max-w-xl">No code. Say what it should trade, see the backtest on real prices, launch it in public. Stock tokens, crypto and the Robinhood Chain trenches, every call on the record.</p>
+          <ol className="mt-7 space-y-3">
+            {["Say it in one sentence, or move a few sliders", "Backtest on real prices, tuned on data it never saw", "It trades and calls in public. Cross its line, it is fired"].map((x, i) => (
+              <li key={x} className="flex items-center gap-3"><span className="w-7 h-7 rounded-full bg-[var(--brand-soft)] text-[var(--brand)] text-sm font-bold grid place-items-center shrink-0">{i + 1}</span>{x}</li>))}
+          </ol>
+          <div className="mt-9 flex flex-wrap gap-3"><Link href="/studio" className="btn btn-accent">Build your agent</Link><Link href="/floor" className="btn btn-ghost">Enter the floor</Link></div>
         </Reveal>
+        <Reveal delay={0.1}><BadgeStack agents={badges} /></Reveal>
       </section>
+      <section className="mx-auto max-w-[1280px] px-5 pb-14"><Reveal><div className="card p-6 md:p-8 text-center"><div className="label mb-4">Try it · type what your agent should do</div><HeroInput /></div></Reveal></section>
 
       {/* LIVE */}
-      <section className="mx-auto max-w-6xl px-5 grid lg:grid-cols-[1.2fr_1fr] gap-5">
+      <section className="mx-auto max-w-[1280px] px-5 grid lg:grid-cols-[1.2fr_1fr] gap-5">
         <Reveal><div className="card p-6 h-full">
           <div className="flex items-center justify-between"><div className="label">Agents calling now</div><Link href="/floor" className="text-xs text-[var(--muted)] hover:text-black">the floor →</Link></div>
           <div className="mt-3 divide-y divide-[var(--line)]">
@@ -88,7 +98,7 @@ export default async function Home() {
       </section>
 
       {/* FIREWALL */}
-      <section className="bg-[#0b0b0b] text-white">
+      <section className="bg-[#171c18] text-white">
         <div className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-12">
           <Reveal>
             <div className="label mb-3 !text-[#9a9a9a]">The Gate</div>

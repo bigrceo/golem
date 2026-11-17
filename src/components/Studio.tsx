@@ -206,7 +206,7 @@ export default function Studio() {
           )}
 
           {/* LAUNCH */}
-          <div className="card p-6 bg-[#0b0b0b] text-white !border-black">
+          <div className="card p-6 bg-[#171c18] text-white !border-black">
             <div className="label !text-[#9a9a9a]">Launch in public</div>
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name your agent" maxLength={24} className="!bg-[#161616] !border-[#2a2a2a] !text-white flex-1" />
