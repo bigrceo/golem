@@ -12,7 +12,7 @@ type Dec = { t: number; action: string; market: string; reason: string; price: n
 type Res = { id: string; agentId: string; name: string; strategy: string; markets: string[]; equity: number; pnl: number; holdPnl: number; edge: number; maxDrawdown: number; status: "working" | "fired"; curve: number[]; decisions: Dec[]; trades: number; inPosition: boolean };
 
 const KEY = "hire:vault:v1";
-const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "down" };
+const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "text-[var(--muted)]", STOP: "text-[var(--muted)]" };
 const load = (): Vault | null => { try { const v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch { return null; } };
 const save = (v: Vault | null) => { try { if (v) localStorage.setItem(KEY, JSON.stringify(v)); else localStorage.removeItem(KEY); } catch {} };
 
@@ -44,7 +44,7 @@ export default function Dashboard() {
     let changed = false;
     const hires = vault.hires.map((h) => {
       const r = res[h.id];
-      if (!h.firedAt && r?.status === "fired") { changed = true; const f = r.decisions.find((d) => d.action === "FIRED"); return { ...h, firedAt: f?.t ?? Date.now(), finalEquity: r.equity, firedReason: f?.reason ?? "drawdown line crossed" }; }
+      if (!h.firedAt && r?.status === "fired") { changed = true; const f = r.decisions.find((d) => d.action === "STOP"); return { ...h, firedAt: f?.t ?? Date.now(), finalEquity: r.equity, firedReason: f?.reason ?? "reached its safety line" }; }
       return h;
     });
     if (changed) commit({ ...vault, hires });
@@ -68,7 +68,7 @@ export default function Dashboard() {
   const fire = (h: Hire) => {
     if (!vault) return;
     const r = res[h.id];
-    commit({ ...vault, hires: vault.hires.map((x) => (x.id === h.id ? { ...x, firedAt: Date.now(), finalEquity: r?.equity ?? x.cash, firedReason: "fired by you" } : x)) });
+    commit({ ...vault, hires: vault.hires.map((x) => (x.id === h.id ? { ...x, firedAt: Date.now(), finalEquity: r?.equity ?? x.cash, firedReason: "paused by you" } : x)) });
   };
   const spec = AGENTS.find((a) => a.id === agentId)!;
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
         <div className="card p-8 md:p-10">
           <div className="label mb-3">Step 1</div>
           <h2 className="text-3xl md:text-4xl font-bold">Open your paper vault.</h2>
-          <p className="mt-3 text-[var(--muted)] max-w-md">Real prices, virtual USDG. Hire agents, set their firing lines, watch them work. No wallet, no gas, nothing to fund.</p>
+          <p className="mt-3 text-[var(--muted)] max-w-md">Real prices, virtual USDG. Hire agents, set their safety lines, watch them work. No wallet, no gas, nothing to fund.</p>
           <label className="block mt-8 text-sm"><span className="text-[var(--muted)]">Starting balance</span>
             <div className="mt-2 flex gap-2 flex-wrap">{[1000, 10000, 50000].map((v) => <button key={v} onClick={() => setDeposit(v)} className={`btn !py-2.5 ${deposit === v ? "btn-brand" : "btn-ghost"}`}>{v.toLocaleString()} USDG</button>)}</div>
           </label>
@@ -88,7 +88,7 @@ export default function Dashboard() {
         </div>
         <div className="card-soft p-8 md:p-10">
           <div className="label mb-5">How the vault works</div>
-          {[["Hire", "Pick an agent, give it part of the vault, set the drawdown that gets it fired."], ["Watch", "It trades its market on live prices. Every call shows up in your log with the reason."], ["Fire", "Cross your line and it is fired on the spot. Or fire it yourself, anytime."]].map(([t, d], i) => (
+          {[["Hire", "Pick an agent, give it part of the vault, set its safety line."], ["Watch", "It trades its market on live prices. Every call shows up in your log with the reason."], ["Stay in control", "It stops on its own at its safety line. Or pause it yourself, anytime."]].map(([t, d], i) => (
             <div key={t} className="flex gap-4 mb-6 last:mb-0"><div className="icon-box num text-sm shrink-0">0{i + 1}</div><div><div className="font-bold">{t}</div><p className="text-sm text-[var(--muted)] mt-1">{d}</p></div></div>
           ))}
         </div>
@@ -100,7 +100,7 @@ export default function Dashboard() {
     <Shell right={<button onClick={() => { if (confirm("Close this paper vault and start over?")) commit(null); }} className="btn btn-ghost !py-2 !px-4 text-sm">Reset vault</button>}>
       {/* SUMMARY */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[["Vault value", money(total), ""], ["Since opening", `${pnl >= 0 ? "+" : ""}${money(pnl)}`, pnl >= 0 ? "up" : "down"], ["Free to allocate", money(free), ""], ["Agents", `${active.length} working · ${closed.length} fired`, ""]].map(([l, v, c]) => (
+        {[["Vault value", money(total), ""], ["Since opening", `${pnl >= 0 ? "+" : ""}${money(pnl)}`, pnl >= 0 ? "up" : "down"], ["Free to allocate", money(free), ""], ["Agents", `${active.length} working · ${closed.length} paused`, ""]].map(([l, v, c]) => (
           <div key={l} className="card p-5"><div className="label mb-3">{l}</div><div className={`text-2xl font-bold num ${c}`}>{v}</div></div>
         ))}
       </div>
@@ -120,13 +120,13 @@ export default function Dashboard() {
                     <div className="flex items-center gap-3">
                       <Avatar id={a.id} name={a.name} size={40} />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2"><Link href={`/agents/${a.id}`} className="font-bold hover:underline">{a.name}</Link><span className={`label !tracking-[0.12em] ${fired ? "down" : "up"}`}>{fired ? "Fired" : "Working"}</span></div>
+                        <div className="flex items-center gap-2"><Link href={`/agents/${a.id}`} className="font-bold hover:underline">{a.name}</Link><span className={`label !tracking-[0.12em] ${fired ? "text-[var(--muted)]" : "up"}`}>{fired ? "Paused" : "Working"}</span></div>
                         <div className="text-xs text-[var(--muted)] truncate">{a.strategy} · {a.markets.join("/")} · line {(h.fireAt * 100).toFixed(0)}% · {money(h.cash)}</div>
                       </div>
                       <div className="text-right"><div className="font-bold num">{money(eq)}</div><div className={`text-xs num font-semibold ${p >= 0 ? "up" : "down"}`}>{signed(p)}{!fired && r ? ` · vs hold ${signed(r.holdPnl)}` : ""}</div></div>
                     </div>
-                    {r && !fired && <div className="mt-3 flex items-end justify-between gap-3"><Spark data={r.curve} w={260} h={34} color={p >= 0 ? "var(--up)" : "var(--down)"} /><button onClick={() => fire(h)} className="btn btn-ghost !py-1.5 !px-3 text-xs down">Fire</button></div>}
-                    {fired && <div className="mt-2 text-xs down">{h.firedReason}</div>}
+                    {r && !fired && <div className="mt-3 flex items-end justify-between gap-3"><Spark data={r.curve} w={260} h={34} color={p >= 0 ? "var(--up)" : "var(--down)"} /><button onClick={() => fire(h)} className="btn btn-ghost !py-1.5 !px-3 text-xs">Pause</button></div>}
+                    {fired && <div className="mt-2 text-xs text-[var(--muted)]">{h.firedReason}</div>}
                   </div>
                 );
               })}
@@ -164,7 +164,7 @@ export default function Dashboard() {
           <label className="block mt-5 text-sm"><span className="text-[var(--muted)]">Allocation</span>
             <input type="range" min={100} max={Math.max(100, Math.floor(free / 100) * 100)} step={100} value={Math.min(alloc, Math.max(100, free))} onChange={(e) => setAlloc(+e.target.value)} className="w-full mt-2" />
             <div className="font-bold num">{money(Math.min(alloc, free))} <span className="text-[var(--muted)] font-normal">of {money(free)} free</span></div></label>
-          <label className="block mt-4 text-sm"><span className="text-[var(--muted)]">Firing line</span>
+          <label className="block mt-4 text-sm"><span className="text-[var(--muted)]">Safety line</span>
             <input type="range" min={2} max={20} value={line} onChange={(e) => setLine(+e.target.value)} className="w-full mt-2" />
             <div className="font-bold num">{line}% <span className="text-[var(--muted)] font-normal">max drawdown</span></div></label>
           <button onClick={() => { setAlloc(Math.min(alloc, free)); hire(); }} disabled={free < 100} className="btn btn-brand mt-6 w-full">Hire {spec.name.split(" ")[1]}</button>

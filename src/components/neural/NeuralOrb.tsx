@@ -1,10 +1,10 @@
 "use client";
 /** MURMUR's hero orb, on paper: a point sphere wired to its nearest neighbours, assembling from a scattered cloud,
- *  breathing, following the mouse. Labels around it send pulses into the orb: read, decide, trade, fire. */
+ *  breathing, following the mouse. Labels around it send pulses into the orb: read, decide, trade, learn. */
 import { useMemo, useRef } from "react";
 import { useCanvasLoop, mouse } from "./loop";
 
-const STEPS = [["Read", "18%", "30%"], ["Decide", "6%", "62%"], ["Trade", "82%", "28%"], ["Fire", "92%", "64%"]] as const;
+const STEPS = [["Read", "18%", "30%"], ["Decide", "6%", "62%"], ["Trade", "82%", "28%"], ["Learn", "92%", "64%"]] as const;
 
 export default function NeuralOrb({ className = "" }: { className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);

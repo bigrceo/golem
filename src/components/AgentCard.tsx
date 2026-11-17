@@ -17,7 +17,7 @@ export default function AgentCard({ a, rank }: { a: AgentResult; rank?: number }
             <div className="text-xs text-[var(--muted)]">{a.strategy} · {a.markets.join("/")}</div>
           </div>
         </div>
-        <div className={`label !tracking-[0.12em] ${fired ? "down" : "up"}`}>{fired ? "Fired" : "Working"}</div>
+        <div className={`label !tracking-[0.12em] ${fired ? "text-[var(--muted)]" : "up"}`}>{fired ? "Paused" : "Working"}</div>
       </div>
       <div className="mt-4 flex items-end justify-between">
         <div>

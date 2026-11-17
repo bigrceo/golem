@@ -1,6 +1,6 @@
 /**
  * The no-code agent: a strategy (NOUNY's five, same settings) plus universal exits,
- * sizing and a firing line. Pure functions: backtest, live replay, compare, auto-tune.
+ * sizing and a safety line. Pure functions: backtest, live replay, compare, auto-tune.
  */
 export type Candle = { t: number; o: number; h: number; l: number; c: number };
 
@@ -40,7 +40,7 @@ export const STRATEGIES: Record<Strategy["kind"], { name: string; buys: string; 
     params: [{ key: "trend", label: "Trend average", min: 48, max: 400, step: 1, unit: "h" }, { key: "window", label: "Dip window", min: 10, max: 100, step: 1, unit: "h" }, { key: "sigma", label: "Dip depth", min: 0.5, max: 4, step: 0.1, unit: "σ" }, { key: "trail", label: "Trailing stop", min: 1, max: 30, step: 0.5, unit: "%" }] },
 };
 
-export type Decision = { t: number; action: "BUY" | "SELL" | "HOLD" | "FIRED"; reason: string; price: number };
+export type Decision = { t: number; action: "BUY" | "SELL" | "HOLD" | "STOP"; reason: string; price: number };
 export type Result = {
   ret: number; hold: number; edge: number; maxDD: number; trades: number; winRate: number;
   equity: number; curve: number[]; holdCurve: number[]; decisions: Decision[]; fired: boolean; inPosition: boolean; signal: string; from: number; to: number;
@@ -81,7 +81,7 @@ export function run(candles: Candle[], spec: Spec, opts: { start?: number; cash?
     const p = c[i]; const eq = cash + units * p; curve.push(eq); holdCurve.push((cash0 * p) / c[start]);
     peak = Math.max(peak, eq); const dd = 1 - eq / peak; maxDD = Math.max(maxDD, dd);
     if (fired) continue;
-    if (dd * 100 >= spec.fireLine) { sell(i, "closing before firing"); note(i, "FIRED", `down ${(dd * 100).toFixed(1)}% from peak, line ${spec.fireLine}%`); fired = true; continue; }
+    if (dd * 100 >= spec.fireLine) { sell(i, "closing at the safety line"); note(i, "STOP", `reached its ${spec.fireLine}% safety line, vault protected`); fired = true; continue; }
     const inPos = units > 0;
     if (inPos) {
       peakSince = Math.max(peakSince, p); const pnl = (p / entry - 1) * 100; const fromPeak = (1 - p / peakSince) * 100;
@@ -162,5 +162,5 @@ export function describe(spec: Spec) {
     case "dip": buys = `${spec.market} is above its ${s.trend}h trend and dips ${s.sigma}σ under its ${s.window}h average`; sells = `it bounces back, or falls ${s.trail}% from its peak`; break;
   }
   const extra = [spec.tp ? `takes profit at +${spec.tp}%` : "", spec.sl ? `cuts at -${spec.sl}%` : "", spec.maxHold ? `never holds over ${spec.maxHold}h` : ""].filter(Boolean);
-  return `Buys ${Math.round(spec.size * 100)}% of the vault when ${buys}. Sells when ${sells}${extra.length ? `. Also ${extra.join(", ")}` : ""}. Fired at ${spec.fireLine}% drawdown.`;
+  return `Buys ${Math.round(spec.size * 100)}% of the vault when ${buys}. Sells when ${sells}${extra.length ? `. Also ${extra.join(", ")}` : ""}. Stops at its ${spec.fireLine}% safety line.`;
 }

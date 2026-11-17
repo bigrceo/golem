@@ -8,7 +8,7 @@ import Avatar from "@/components/Avatar";
 import { money, signed, hhmm } from "@/lib/fmt";
 
 export const revalidate = 60;
-const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "down" };
+const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "text-[var(--muted)]", STOP: "text-[var(--muted)]" };
 
 export default async function AgentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,7 +28,7 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
               <h1 className="text-4xl font-bold tracking-tight">{a.name}</h1>
               <div className="text-[var(--muted)]">#{rank} on the desk · {a.strategy} · {a.markets.join(" / ")} · ${a.handle.toUpperCase()}</div>
             </div>
-            <div className={`ml-auto label !tracking-[0.12em] ${fired ? "down" : "up"}`}>{fired ? "Fired" : "Working"}</div>
+            <div className={`ml-auto label !tracking-[0.12em] ${fired ? "down" : "up"}`}>{fired ? "Paused" : "Working"}</div>
           </div>
           <p className="mt-6 text-lg text-[var(--muted)] max-w-2xl">{a.pitch}</p>
 

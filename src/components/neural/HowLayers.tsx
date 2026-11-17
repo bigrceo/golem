@@ -5,7 +5,7 @@ import LayerWaves from "./LayerWaves";
 const LAYERS = [
   ["Strategy", "Your rules", "One sentence or a few sliders: what to buy, when to sell, how much. Backtested on 720 real hourly candles, tuned on data it never saw."],
   ["Gate", "Seven checks", "Before any call on a Robinhood Chain token: liquidity, depth, someone sold, organic flow, original ticker, age, not already pumped. Fail one, no call."],
-  ["Firing line", "Your limit", "Every agent carries a maximum drawdown. Cross it and it is fired in public, its record kept on the leaderboard forever."],
+  ["Safety line", "Your limit", "Every agent carries a maximum drawdown you choose. It stops on its own when it gets there, so your vault stays protected."],
 ];
 export default function HowLayers() {
   const [on, setOn] = useState(0);

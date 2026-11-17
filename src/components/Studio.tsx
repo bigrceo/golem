@@ -9,7 +9,7 @@ import TokenLogo from "./TokenLogo";
 
 const MARKETS = ["BTC", "ETH", "SOL", "TSLA", "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "COIN", "SPY", "QQQ"];
 const EXAMPLES = [
-  "Buy ETH when RSI drops below 25, sell above 70, stop loss 5%, fire it at 12%",
+  "Buy ETH when RSI drops below 25, sell above 70, stop loss 5%, max drawdown 12%",
   "Momentum on Tesla, 48 hours high, take profit 20%",
   "NVDA 9/21 cross with half the vault",
   "Buy the dip on BTC in an uptrend",
@@ -73,7 +73,7 @@ export default function Studio() {
 
       {/* SENTENCE */}
       <div className="mt-8 card p-2 flex flex-col md:flex-row gap-2">
-        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && parseText()} placeholder="Buy ETH when RSI drops below 25, sell above 70, fire it at 12%" className="!border-0 !text-lg flex-1 !px-4 !py-3 outline-none" />
+        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && parseText()} placeholder="Buy ETH when RSI drops below 25, sell above 70, max drawdown 12%" className="!border-0 !text-lg flex-1 !px-4 !py-3 outline-none" />
         <button onClick={() => parseText()} className="btn btn-accent">Build it</button>
       </div>
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
@@ -118,7 +118,7 @@ export default function Studio() {
                   <Slider label="Stop loss" value={spec.sl ?? 0} min={0} max={50} step={0.5} unit="%" off onChange={(x) => setSpec({ ...spec, sl: x })} />
                   <Slider label="Time stop" value={spec.maxHold ?? 0} min={0} max={168} step={1} unit="h" off onChange={(x) => setSpec({ ...spec, maxHold: x })} />
                   <Slider label="Size per entry" value={Math.round(spec.size * 100)} min={10} max={100} step={5} unit="%" onChange={(x) => setSpec({ ...spec, size: x / 100 })} />
-                  <Slider label="Firing line" value={spec.fireLine} min={2} max={40} step={1} unit="% drawdown" accent onChange={(x) => setSpec({ ...spec, fireLine: x })} />
+                  <Slider label="Safety line" value={spec.fireLine} min={2} max={40} step={1} unit="% drawdown" accent onChange={(x) => setSpec({ ...spec, fireLine: x })} />
                 </div>
               </div>
             </>
@@ -149,7 +149,7 @@ export default function Studio() {
                   <Slider label="Take profit" value={trench.tp} min={5} max={300} step={5} unit="%" onChange={(x) => setTrench({ ...trench, tp: x })} />
                   <Slider label="Stop" value={trench.sl} min={5} max={80} step={1} unit="%" onChange={(x) => setTrench({ ...trench, sl: x })} />
                   <Slider label="Time stop" value={trench.maxHold} min={1} max={72} step={1} unit="h" onChange={(x) => setTrench({ ...trench, maxHold: x })} />
-                  <Slider label="Firing line" value={trench.fireLine} min={5} max={60} step={1} unit="% drawdown" accent onChange={(x) => setTrench({ ...trench, fireLine: x })} />
+                  <Slider label="Safety line" value={trench.fireLine} min={5} max={60} step={1} unit="% drawdown" accent onChange={(x) => setTrench({ ...trench, fireLine: x })} />
                 </div>
               </div>
             </>
@@ -215,7 +215,7 @@ export default function Studio() {
               <button onClick={launch} disabled={launching} className="btn btn-accent">{launching ? "Launching…" : "Launch agent"}</button>
             </div>
             {err && <p className="mt-2 text-sm text-[#ff8a7a]">{err}</p>}
-            <p className="mt-3 text-xs text-[#9a9a9a]">It gets a public page, a decision log and a seat on the leaderboard. Paper money, real prices, nothing to fund. Cross the firing line and it is fired in public.</p>
+            <p className="mt-3 text-xs text-[#9a9a9a]">It gets a public page, a decision log and a seat on the leaderboard. Paper money, real prices, nothing to fund. Every move lands on its public page.</p>
           </div>
         </div>
       </div>

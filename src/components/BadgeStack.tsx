@@ -1,6 +1,6 @@
 "use client";
-/** Hero visual: agent ID badges floating on the desk. Every few seconds the weakest one is stamped FIRED, bursts into
- *  embers and a new hire takes its place. */
+/** Hero visual: agent ID badges floating on the desk. Every few seconds the leader is stamped TOP with a burst of embers,
+ *  and a new agent joins the desk. */
 import { useEffect, useRef, useState } from "react";
 import Avatar from "./Avatar";
 
@@ -23,7 +23,7 @@ function Badge({ a, n, fired }: { a: BadgeAgent; n: number; fired: boolean }) {
           <span className="text-[10px] text-[var(--muted)] num">ID #{String(1000 + n * 37).padStart(4, "0")}</span>
         </div>
       </div>
-      <span className={`stamp ${fired ? "on" : ""}`}>FIRED</span>
+      <span className={`stamp stamp-top ${fired ? "on" : ""}`}>TOP</span>
     </div>
   );
 }
@@ -36,18 +36,19 @@ export default function BadgeStack({ agents }: { agents: BadgeAgent[] }) {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => {
       setShown((s) => {
-        const worst = s.reduce((w, x, i) => (x.a.pnl < s[w].a.pnl ? i : w), 0);
-        const el = box.current?.querySelectorAll<HTMLElement>("[data-badge]")[worst];
-        if (el) { const r = el.getBoundingClientRect(); setTimeout(() => dispatchEvent(new CustomEvent("hire:burst", { detail: { x: r.left + r.width / 2, y: r.top + r.height / 2 } })), 450); }
-        setTimeout(() => setShown((t) => t.map((x, i) => (i === worst ? { ...x, out: true } : x))), 1100);
+        const best = s.reduce((w, x, i) => (x.a.pnl > s[w].a.pnl ? i : w), 0);
+        const worst = s.reduce((w, x, i) => (i !== best && (w === best || x.a.pnl < s[w].a.pnl) ? i : w), best === 0 ? 1 : 0);
+        const el = box.current?.querySelectorAll<HTMLElement>("[data-badge]")[best];
+        if (el) { const r = el.getBoundingClientRect(); setTimeout(() => dispatchEvent(new CustomEvent("hire:burst", { detail: { x: r.left + r.width / 2, y: r.top + r.height / 3 } })), 350); }
+        setTimeout(() => setShown((t) => t.map((x, i) => (i === worst ? { ...x, out: true } : i === best ? { ...x, fired: false } : x))), 2600);
         setTimeout(() => setShown((t) => {
           const used = new Set(t.map((x) => x.a.slug));
           let a = pool[next.current % pool.length];
           for (let k = 0; k < pool.length && used.has(a.slug); k++) a = pool[++next.current % pool.length];
           next.current++;
           return t.map((x, i) => (i !== worst ? x : { a, n: next.current, fired: false, out: false }));
-        }), 2400);
-        return s.map((x, i) => (i === worst ? { ...x, fired: true } : x));
+        }), 3300);
+        return s.map((x, i) => (i === best ? { ...x, fired: true } : x));
       });
     }, 6500);
     return () => clearInterval(id);

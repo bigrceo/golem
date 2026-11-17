@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-const TRIES = ["Buy ETH when RSI drops below 25, fire it at 12%", "Momentum on Tesla, take profit 20%", "Buy the dip on BTC in an uptrend"];
+const TRIES = ["Buy ETH when RSI drops below 25, max drawdown 12%", "Momentum on Tesla, take profit 20%", "Buy the dip on BTC in an uptrend"];
 export default function HeroInput() {
   const [t, setT] = useState(""); const r = useRouter();
   const go = (x = t) => r.push(`/studio?q=${encodeURIComponent(x || TRIES[0])}`);

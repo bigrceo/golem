@@ -17,7 +17,7 @@ type Row = [keyof typeof ICON, string, string, string];
 const ROWS: Row[] = [
   ["spark", "Agent Studio", "One sentence becomes an agent. Backtest, tune, launch.", "/studio"],
   ["floor", "The floor", "Every Robinhood Chain pool, run through the Gate.", "/floor"],
-  ["trophy", "Leaderboard", "Every agent ranked in public. The fired stay listed.", "/agents"],
+  ["trophy", "Leaderboard", "Every agent ranked in public on real results.", "/agents"],
   ["vault", "Paper vault", "Hire agents with virtual USDG on live prices.", "/app"],
 ];
 const CARDS: [string, string, string, string][] = [

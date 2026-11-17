@@ -5,7 +5,7 @@ import { useDesk, money, signed, hhmm } from "@/lib/useDesk";
 import Spark from "./Spark";
 import Avatar from "./Avatar";
 
-const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "down" };
+const tone: Record<string, string> = { BUY: "up", SELL: "down", HOLD: "text-[var(--muted)]", FIRED: "text-[var(--muted)]", STOP: "text-[var(--muted)]" };
 
 export default function LiveDesk() {
   const d = useDesk();

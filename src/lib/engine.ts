@@ -2,7 +2,7 @@ export type Candle = { t: number; o: number; h: number; l: number; c: number };
 export type MarketId = "BTC" | "ETH" | "SOL" | "TSLA" | "NVDA" | "AAPL";
 export type Market = { id: MarketId; name: string; kind: "crypto" | "stock"; candles: Candle[]; price: number; change24: number };
 
-export type Decision = { t: number; action: "BUY" | "SELL" | "HOLD" | "FIRED"; market: MarketId; reason: string; price: number; equity: number };
+export type Decision = { t: number; action: "BUY" | "SELL" | "HOLD" | "STOP"; market: MarketId; reason: string; price: number; equity: number };
 export type AgentSpec = {
   id: string; name: string; handle: string; strategy: string; markets: MarketId[];
   fireAt: number; pitch: string; hires: number; risk: "Low" | "Medium" | "High"; live: boolean;
@@ -94,8 +94,8 @@ function run(spec: AgentSpec, mk: Record<MarketId, Market>, noFireOrOpts: boolea
     s.peak = Math.max(s.peak, s.equity); s.dd = Math.max(s.dd, 1 - s.equity / s.peak);
     if (s.fired) continue;
     if (!noFire && i >= start && 1 - s.equity / s.peak >= fireAt) {
-      s.fired = true; sell(i, held, "drawdown limit hit");
-      note(i, "FIRED", held, `down ${pct(1 - s.equity / s.peak)}% from peak, limit ${pct(fireAt)}%. Funds back in the vault.`, p);
+      s.fired = true; sell(i, held, "closing at the safety line");
+      note(i, "STOP", held, `reached its ${pct(fireAt)}% safety line, vault protected`, p);
       continue;
     }
     if (i < warm) continue;
@@ -163,7 +163,7 @@ export function runDesk(markets: Market[], noFire = false) {
   return AGENTS.filter((a) => a.markets.every((m) => mk[m]?.candles.length > 30)).map((a) => run(a, mk, noFire)).sort((a, b) => b.edge - a.edge);
 }
 
-/** Replays one paper hire from `since` with the owner's cash and firing line, on live prices. */
+/** Replays one paper hire from `since` with the owner's cash and safety line, on live prices. */
 export function replayHire(markets: Market[], agentId: string, since: number, cash: number, fireAt: number) {
   const mk = Object.fromEntries(markets.map((m) => [m.id, m])) as Record<MarketId, Market>;
   const spec = AGENTS.find((a) => a.id === agentId);

@@ -4,7 +4,7 @@ const QA = [
   ["Do I need to code?", "No. Type what the agent should do in a sentence, or pick a strategy and move sliders. The Studio shows the backtest as you go."],
   ["What can an agent trade?", "Markets mode: BTC, ETH, SOL and 10 Robinhood stock tokens on hourly candles. Trenches mode: every token paired with ETH or USDG on the Robinhood Chain Uniswap v4 PoolManager, refreshed every 5 minutes."],
   ["Do I need to fund anything?", "No. Agents trade paper money on real prices. Your vault on the Vault page is paper too. Nothing to deposit, no gas."],
-  ["What does fired mean?", "Every agent carries a firing line, a maximum drawdown. Cross it and the agent stops, a red line goes on its public record, and it stays on the leaderboard as fired."],
+  ["What is the safety line?", "Every agent carries a safety line, a maximum drawdown you choose. When it gets there, the agent stops on its own, so your vault stays protected. Its record stays on the leaderboard."],
   ["How is the backtest kept honest?", "Fees are counted on every trade, and auto-tune picks settings on the first 75% of the data, then reports the result on the last 25% it never saw."],
   ["What is the Gate?", "Seven checks every trench call must pass: liquidity, pool depth, someone sold, organic flow, original ticker, age and not already pumped. Checks, never a safety stamp."],
   ["Are calls financial advice?", "No. They are public, rule-based calls with their result on the record. Do your own research."],
