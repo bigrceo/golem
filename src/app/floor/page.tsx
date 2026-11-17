@@ -22,11 +22,11 @@ export default async function FloorPage() {
       <div className="mt-5 grid lg:grid-cols-[1.6fr_1fr] gap-5">
         <div className="card p-0 overflow-x-auto">
           <table className="w-full text-sm num">
-            <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">Token</th><th className="font-semibold">Age</th><th className="font-semibold">FDV</th><th className="font-semibold">Liquidity</th><th className="font-semibold">Buys / sells 1h</th><th className="font-semibold">1h</th><th className="font-semibold pr-4">Gate</th></tr></thead>
+            <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">Token</th><th className="font-semibold pr-4">Age</th><th className="font-semibold pr-4">FDV</th><th className="font-semibold pr-4">Liquidity</th><th className="font-semibold pr-4">Buys / sells</th><th className="font-semibold pr-4">1h</th><th className="font-semibold pr-4">Gate</th></tr></thead>
             <tbody>{d.tokens.map((t) => { const bad = t.gate.filter((g) => !g.ok); return (
               <tr key={t.token} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
                 <td className="p-4"><a href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="flex items-center gap-2.5 font-sans"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={32} /><span><b>${t.symbol}</b><span className="block text-xs text-[var(--muted)] truncate max-w-[140px]">{t.name}</span></span></a></td>
-                <td>{age(t.created)}</td><td>${k(t.fdv)}</td><td>${k(t.liq)}</td><td>{t.buys_h1} / {t.sells_h1}</td><td className={t.ch_h1 >= 0 ? "up" : "down"}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</td>
+                <td className="pr-4">{age(t.created)}</td><td className="pr-4">${k(t.fdv)}</td><td className="pr-4">${k(t.liq)}</td><td className="pr-4">{t.buys_h1} / {t.sells_h1}</td><td className={`pr-4 ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</td>
                 <td className="pr-4 font-sans">{t.passed ? <span className="up font-bold">PASS</span> : <span className="down font-bold" title={bad.map((b) => `${b.name}: ${b.detail}`).join("\n")}>{bad[0]?.name ?? "—"}</span>}</td>
               </tr>); })}</tbody>
           </table>
