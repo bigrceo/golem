@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-export const alt = "hire — Hire a trading agent in one sentence. Fire it when it loses.";
+export const alt = "hire — Build a trading agent in one sentence. Fire it when it loses.";
 const FLOOR = `data:image/jpeg;base64,${readFileSync(join(process.cwd(), "public/art/floor.jpg")).toString("base64")}`;
 export default function OG() {
   return new ImageResponse(
@@ -15,7 +15,7 @@ export default function OG() {
         <div style={{ fontSize: 46, fontWeight: 800, color: "#171c18", letterSpacing: -2 }}>hire</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", padding: "34px 72px 0", fontSize: 76, fontWeight: 800, color: "#171c18", letterSpacing: -3, lineHeight: 1.02 }}>
-        <div>Hire an agent in one sentence.</div><div style={{ color: "#f2621b" }}>Fire it when it loses.</div>
+        <div>Build an agent in one sentence.</div><div style={{ color: "#f2621b" }}>Fire it when it loses.</div>
       </div>
     </div>, size);
 }
