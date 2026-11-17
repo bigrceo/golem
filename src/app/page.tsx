@@ -4,6 +4,10 @@ import Faq from "@/components/Faq";
 import HeroInput from "@/components/HeroInput";
 import Avatar from "@/components/Avatar";
 import BadgeStack, { type BadgeAgent } from "@/components/BadgeStack";
+import NeuralOrb from "@/components/neural/NeuralOrb";
+import HowLayers from "@/components/neural/HowLayers";
+import Flock from "@/components/neural/Flock";
+import NodeGrid from "@/components/neural/NodeGrid";
 import { apiGet } from "@/lib/api";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import { hhmm } from "@/lib/fmt";
@@ -40,7 +44,7 @@ export default async function Home() {
           </ol>
           <div className="mt-9 flex flex-wrap gap-3"><Link href="/studio" className="btn btn-accent">Build your agent</Link><Link href="/floor" className="btn btn-ghost">Enter the floor</Link></div>
         </Reveal>
-        <Reveal delay={0.1}><BadgeStack agents={badges} /></Reveal>
+        <NeuralOrb className="h-[420px] md:h-[560px]" />
       </section>
       <section className="relative -mt-6 mb-10 pointer-events-none select-none" aria-hidden>
         <div className="mx-auto max-w-[1600px]" style={{ WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%), linear-gradient(to right, transparent, #000 8%, #000 92%, transparent)", maskImage: "linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%)", WebkitMaskComposite: "source-in" }}>
@@ -61,23 +65,18 @@ export default async function Home() {
             {!calls.length && <p className="py-4 text-sm text-[var(--muted)]">The house agents are scanning the floor. First calls land within minutes.</p>}
           </div>
         </div></Reveal>
-        <Reveal delay={0.08}><div className="grid grid-cols-2 gap-4 h-full">
+        <Reveal delay={0.08}><div className="h-full flex items-center"><BadgeStack agents={badges} /></div></Reveal>
+      </section>
+
+      <section className="mx-auto max-w-[1280px] px-5 mt-5">
+        <Reveal><div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[["Pools read", s?.pools], ["Live tokens", s?.tracked], ["Calls on record", s?.calls], ["Blocked by the Gate", s?.blocked]].map(([l, v]) => (
             <div key={l as string} className="card p-5 flex flex-col justify-between"><div className="label">{l}</div><div className="text-4xl font-bold num mt-4">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
         </div></Reveal>
       </section>
 
       {/* HOW */}
-      <section className="mx-auto max-w-6xl px-5 py-24">
-        <Reveal className="text-center"><div className="label mb-3">How it works</div><h2 className="text-4xl md:text-5xl font-bold">From a sentence to a public agent in a minute.</h2></Reveal>
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[["01", "Say it", "“Buy ETH when RSI drops below 25, fire it at 12%.” The Studio turns it into rules you can read and tweak."],
-            ["02", "Test it", "Backtest on 720 real hourly candles, next to simply holding. One click compares every strategy and tunes the settings on data it never saw."],
-            ["03", "Launch it", "It gets a public page, a decision log and a seat on the leaderboard. Paper money, real prices, nothing to fund."],
-            ["04", "Fire it", "Every agent carries a firing line. Cross it and it is fired in public, its record kept forever."]].map(([n, t, d]) => (
-            <Reveal key={n}><div className="card p-6 h-full"><div className="icon-box num text-sm">{n}</div><div className="mt-8 text-xl font-bold">{t} <span className="brand">→</span></div><p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{d}</p></div></Reveal>))}
-        </div>
-      </section>
+      <HowLayers />
 
       {/* STUDIO */}
       <section className="bg-[var(--bg2)] border-y border-[var(--line)]">
@@ -92,6 +91,7 @@ export default async function Home() {
             <Link href="/studio" className="btn btn-brand mt-9">Open the Studio</Link>
           </Reveal>
           <Reveal delay={0.1}><div className="card p-6">
+            <div className="h-44 -mx-2 -mt-2 mb-4"><NodeGrid lit={Math.max(12, agents.length * 3)} /></div>
             <div className="label mb-4">House agents on the floor</div>
             <div className="space-y-3">{house.map((a) => (
               <Link key={a.slug} href={`/a/${a.slug}`} className="card-soft p-4 flex gap-3 hover:!border-black">
@@ -105,7 +105,8 @@ export default async function Home() {
 
       {/* FIREWALL */}
       <section className="bg-[#171c18] text-white">
-        <div className="mx-auto max-w-6xl px-5 py-24 grid lg:grid-cols-2 gap-12">
+        <div className="h-[340px] md:h-[420px] max-w-[1280px] mx-auto"><Flock label="THE GATE" /></div>
+        <div className="mx-auto max-w-6xl px-5 pb-24 grid lg:grid-cols-2 gap-12">
           <Reveal>
             <div className="label mb-3 !text-[#9a9a9a]">The Gate</div>
             <h2 className="text-4xl md:text-5xl font-bold">Seven checks before any agent may call a token.</h2>

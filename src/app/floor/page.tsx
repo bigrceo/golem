@@ -2,6 +2,7 @@ import Link from "next/link";
 import { apiGet } from "@/lib/api";
 import { k, type FloorToken } from "@/lib/trench";
 import { hhmm } from "@/lib/fmt";
+import NodeGrid from "@/components/neural/NodeGrid";
 export const revalidate = 30;
 export const metadata = { title: "hire · The floor", description: "Every Robinhood Chain pool, read from the chain, run through the Gate." };
 type Floor = { lastRun: number; stats: { pools: number; tracked: number; calls: number; blocked: number; passed: number; agents: number } | null; tokens: FloorToken[]; checks: { agent: string; symbol: string; t: number; passed: number; reason: string }[] };
@@ -12,7 +13,7 @@ export default async function FloorPage() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-10">
       <div className="label mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />The floor · Robinhood Chain</div>
-      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Every new pool, read from the chain, run through the Gate.</h1>
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 items-center"><h1 className="text-4xl md:text-6xl font-bold">Every new pool, read from the chain, run through the Gate.</h1><div className="hidden lg:block h-56"><NodeGrid lit={Math.min(160, d.stats?.tracked ?? 40)} /></div></div>
       <div className="mt-8 grid grid-cols-2 md:grid-cols-5 gap-4">
         {[["Pools seen", d.stats?.pools], ["Live tokens", d.stats?.tracked], ["Calls", d.stats?.calls], ["Passed", d.stats?.passed], ["Blocked", d.stats?.blocked]].map(([l, v]) => (
           <div key={l as string} className="card p-5"><div className="label mb-2">{l}</div><div className="text-3xl font-bold num">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}

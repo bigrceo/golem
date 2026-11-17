@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { STRATEGIES, type Spec, type Strategy } from "@/lib/rules";
 import { TRENCH_DEFAULT, matches, describeTrench, k, type Trench, type FloorToken } from "@/lib/trench";
 import Spark from "./Spark";
+import NeuralOrb from "./neural/NeuralOrb";
 
 const MARKETS = ["BTC", "ETH", "SOL", "TSLA", "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "META", "COIN", "SPY", "QQQ"];
 const EXAMPLES = [
@@ -66,8 +67,8 @@ export default function Studio() {
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-10">
-      <div className="label mb-2">Agent Studio · no code</div>
-      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Say what it should do. Watch it trade.</h1>
+      <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4 items-center"><div><div className="label mb-2">Agent Studio · no code</div>
+      <h1 className="text-4xl md:text-6xl font-bold max-w-4xl">Say what it should do. Watch it trade.</h1></div><NeuralOrb className="hidden lg:block h-64" /></div>
 
       {/* SENTENCE */}
       <div className="mt-8 card p-2 flex flex-col md:flex-row gap-2">
