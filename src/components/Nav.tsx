@@ -51,7 +51,7 @@ export default function Nav() {
     <nav id="nav" className={[glass && "frost", slim && !mobile && !menu && "slim", menu && "open", mobile && "mopen"].filter(Boolean).join(" ")} onMouseLeave={() => (shut.current = setTimeout(() => setMenu(false), 180))}>
       <div className="nwrap">
         <div className="bar">
-          <Link href="/" aria-label="GOLEM" onMouseEnter={() => open(false)}><Logo /></Link>
+          <Link href="/" aria-label="golem" onMouseEnter={() => open(false)}><Logo size={38} /></Link>
           <div className="nlinks">
             <button type="button" className={menu ? "on" : ""} onMouseEnter={() => hover() && open(true)} onClick={() => open(hover() || !menu)} aria-expanded={menu}>Agents<Chev /></button>
             {L("/studio", "Studio")}{L("/floor", "Floor")}{L("/agents", "Leaderboard")}{L("/app", "Vault")}

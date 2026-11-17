@@ -4,5 +4,5 @@ export function LogoMark({ size = 36 }: { size?: number }) {
   return <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden dangerouslySetInnerHTML={{ __html: `<rect width="64" height="64" rx="16" fill="#ff6a24"/>${MARK_SVG()}` }} />;
 }
 export function Logo({ size = 34 }: { size?: number }) {
-  return <span className="inline-flex items-center gap-2.5 font-bold tracking-[-0.04em] text-[22px]"><LogoMark size={size} /><span className="logo-word">golem</span></span>;
+  return <span className="inline-flex items-center gap-2.5 font-bold tracking-[-0.04em] text-[22px]"><LogoMark size={size} /></span>;
 }

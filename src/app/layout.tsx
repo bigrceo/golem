@@ -5,7 +5,6 @@ import Nav from "@/components/Nav";
 import Providers from "@/components/Providers";
 import DevWallet from "@/components/DevWallet";
 import Embers from "@/components/Embers";
-import TopBar from "@/components/TopBar";
 
 const sora = Sora({ subsets: ["latin"], variable: "--font-sora", weight: ["400", "500", "600", "700", "800"] });
 
@@ -22,7 +21,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <DevWallet />
         <Embers />
         <Providers>
-          <TopBar />
           <Nav />
           {children}
         </Providers>
