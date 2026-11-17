@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { apiGet } from "@/lib/api";
+import { apiGet, getFloor } from "@/lib/api";
+import { HOUSE } from "@/lib/house";
+import { matches } from "@/lib/trench";
 import { marketRecord } from "@/lib/live";
 import { describeTrench, type Trench } from "@/lib/trench";
 import type { Spec } from "@/lib/rules";
@@ -15,8 +17,9 @@ type A = { slug: string; name: string; kind: "market" | "trench"; spec: Spec & T
 const sgn = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 
 export default async function Leaderboard() {
-  const [d, markets] = await Promise.all([apiGet<{ agents: A[] }>("/agents", 60), loadMarkets()]);
-  const list = d?.agents ?? [];
+  const [d, markets, fl] = await Promise.all([apiGet<{ agents: A[] }>("/agents", 60), loadMarkets(), getFloor()]);
+  const list: A[] = d?.agents?.length ? d.agents : (HOUSE as unknown as A[]);
+  const watching = (a: A) => fl.tokens.filter((t) => matches(a.spec, t)).length;
   const trench = list.filter((a) => a.kind === "trench").sort((x, y) => (y.stats?.equity ?? 0) - (x.stats?.equity ?? 0));
   const market = await Promise.all(list.filter((a) => a.kind === "market").slice(0, 60).map(async (a) => { try { return { a, r: await marketRecord(a.spec, a.created_at) }; } catch { return null; } }));
   const mk = market.filter(Boolean).sort((x, y) => y!.r.backtest.edge - x!.r.backtest.edge) as { a: A; r: Awaited<ReturnType<typeof marketRecord>> }[];
@@ -36,13 +39,13 @@ export default async function Leaderboard() {
           <tr key={a.slug} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
             <td className="p-4 text-[var(--muted)]">{i + 1}</td>
             <td className="font-sans"><Link href={`/a/${a.slug}`} className="flex items-center gap-3 py-3"><Avatar id={a.slug} name={a.name} size={34} /><span><b>@{a.slug}</b>{a.house ? <span className="label !text-[var(--brand)] ml-2">House</span> : null}<span className="block text-xs text-[var(--muted)] max-w-md truncate">{a.spec.bio ?? describeTrench(a.spec)}</span></span></Link></td>
-            <td>{a.stats?.count ?? 0}</td><td>{a.stats?.hit ?? 0}%</td><td className={(a.stats?.avg ?? 0) >= 0 ? "up" : "down"}>{sgn(a.stats?.avg ?? 0)}</td><td>${(a.stats?.equity ?? 10000).toLocaleString("en-US")}</td>
+            {a.stats?.count ? <><td>{a.stats.count}</td><td>{a.stats.hit ? `${a.stats.hit}%` : "—"}</td><td className={a.stats.avg >= 0 ? "up" : "down"}>{a.stats.avg ? sgn(a.stats.avg) : "—"}</td><td>${a.stats.equity.toLocaleString("en-US")}</td></> : <td colSpan={4} className="font-sans brand">watching {watching(a)} tokens on the floor right now</td>}
             <td className={`pr-4 font-sans font-semibold ${a.fired_at ? "down" : "up"}`}>{a.fired_at ? "Fired" : "Working"}</td>
           </tr>))}</tbody></table>
-        {!trench.length && <p className="p-6 text-[var(--muted)]">No trench agent yet.</p>}</div>
+</div>
 
-      <h2 className="mt-12 text-2xl font-bold">Markets · built in the Studio</h2>
-      {!mk.length ? <div className="mt-4 card p-8 text-center"><p className="text-[var(--muted)]">Nobody has launched a market agent yet. Be first on the board.</p><Link href="/studio" className="btn btn-brand mt-5">Open the Studio</Link></div> : (
+      {mk.length > 0 && <h2 className="mt-12 text-2xl font-bold">Markets · built in the Studio</h2>}
+      {!mk.length ? null : (
         <div className="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4">{mk.map(({ a, r }, i) => (
           <Link key={a.slug} href={`/a/${a.slug}`} className="card p-5 hover:border-[var(--brand)]">
             <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "down" : "up"}`}>{r.live.fired ? "Fired" : "Working"}</span></div>

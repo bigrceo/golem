@@ -14,8 +14,8 @@ function Badge({ a, n, fired }: { a: BadgeAgent; n: number; fired: boolean }) {
       <div className="h-9 bg-black flex items-center justify-between px-4"><span className="text-white text-xs font-bold tracking-[.16em]">golem · AGENT</span><span className="w-10 h-2 rounded-full bg-[var(--bg2)]" /></div>
       <div className="p-4">
         <div className="flex items-center gap-3"><Avatar id={a.slug} name={a.slug} size={46} /><div className="min-w-0"><div className="font-bold truncate">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate">{a.role}</div></div></div>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          {[["PnL", `${a.pnl >= 0 ? "+" : ""}${a.pnl.toFixed(1)}%`, a.pnl >= 0 ? "up" : "down"], ["Calls", String(a.calls), ""], ["Hit", `${a.hit}%`, ""]].map(([l, v, c]) => (
+        <div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(0,1fr))] gap-2 text-center">
+          {([["Edge", `${a.pnl >= 0 ? "+" : ""}${a.pnl.toFixed(1)}%`, a.pnl >= 0 ? "up" : "down", a.pnl !== 0], ["Trades", String(a.calls), "", a.calls > 0], ["Win", `${a.hit}%`, "", a.hit > 0]] as [string, string, string, boolean][]).filter((x) => x[3]).map(([l, v, c]) => (
             <div key={l} className="card-soft py-2"><div className={`text-sm font-bold num ${c}`}>{v}</div><div className="text-[10px] text-[var(--muted)] uppercase tracking-wider">{l}</div></div>))}
         </div>
         <div className="mt-4 flex items-end justify-between">

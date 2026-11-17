@@ -6,3 +6,6 @@ create table if not exists meta (k text primary key, v text);
 create index if not exists calls_agent on calls(agent);
 create index if not exists calls_open on calls(closed_at);
 create index if not exists tokens_seen on tokens(last_seen);
+create index if not exists tokens_liq on tokens(liq);
+create index if not exists tokens_first on tokens(first_seen);
+create index if not exists checks_agent on checks(agent);

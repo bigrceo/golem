@@ -48,7 +48,7 @@ export default function NeuralOrb({ className = "" }: { className?: string }) {
   }, [P, E]);
   return (
     <div ref={box} className={`relative ${className}`}>
-      <canvas ref={ref} className="absolute inset-0 w-full h-full" aria-hidden />
+      <canvas ref={ref} className="absolute inset-0 w-full h-full fade-edges" aria-hidden />
       {STEPS.map(([l, x, y], i) => <span key={l} data-step className={`absolute -translate-x-1/2 text-sm font-semibold tracking-wide ${i === 3 ? "brand" : ""}`} style={{ left: x, top: y }}>{l}</span>)}
     </div>
   );

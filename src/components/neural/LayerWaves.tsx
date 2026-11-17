@@ -28,5 +28,5 @@ export default function LayerWaves({ section, labels, onLayer }: { section: stri
       c.strokeStyle = "rgba(236,233,224,.2)"; c.beginPath(); [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, -1]].forEach(([u, v], k) => { const [X, Y] = proj(u, -off, v); if (k) c.lineTo(X, Y); else c.moveTo(X, Y); }); c.stroke();
     }
   }, [labels.join()]);
-  return <canvas ref={ref} className="w-full h-full" aria-hidden />;
+  return <canvas ref={ref} className="w-full h-full fade-edges" aria-hidden />;
 }

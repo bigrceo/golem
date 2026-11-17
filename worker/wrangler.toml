@@ -8,8 +8,12 @@ database_name = "hire-db"
 database_id = "d649cf61-78ed-422f-b307-7f7a69c2e5d7"
 
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/10 * * * *"]
 
 [vars]
 RPC = "https://rpc.mainnet.chain.robinhood.com"
 WEB = "https://hire-desk-five.vercel.app"
+
+[[kv_namespaces]]
+binding = "SNAP"
+id = "6a5b3b41881d424d9ddf0fd26ceb056d"

@@ -120,3 +120,4 @@ nav#nav.slim .logo-word { max-width: 0; opacity: 0; }
 
 html { color-scheme: dark; }
 .etch-flat { mix-blend-mode: screen; }
+.fade-edges { -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 55%, transparent 100%); }

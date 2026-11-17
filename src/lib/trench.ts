@@ -9,7 +9,7 @@ export const TRENCH_DEFAULT: Trench = { universe: "trenches", side: "bull", maxA
 export type FloorToken = { token: string; pair: string; symbol: string; name: string; created: number; price: number; fdv: number; liq: number; buys_h1: number; sells_h1: number; ch_m5: number; ch_h1: number; ch_h24: number; vol_h24: number; image: string | null; passed: number; gate: { name: string; ok: boolean; detail: string }[] };
 export function matches(s: Trench, t: FloorToken, now = Date.now()) {
   const ratio = t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1;
-  return t.created >= now - s.maxAgeH * 3600_000 && t.liq >= s.minLiq && t.fdv >= s.minFdv && t.fdv <= s.maxFdv && t.buys_h1 >= s.minBuysH1 && ratio >= s.minBuyRatio && t.ch_h1 >= s.minChH1 && t.ch_h1 <= s.maxChH1 && t.ch_m5 >= s.minChM5 && (s.side === "bear" || !!t.passed);
+  return t.created >= now - s.maxAgeH * 3600_000 && t.liq >= s.minLiq && t.fdv >= s.minFdv && t.fdv <= s.maxFdv && t.buys_h1 >= s.minBuysH1 && ratio >= s.minBuyRatio && t.ch_h1 >= s.minChH1 && t.ch_h1 <= s.maxChH1 && t.ch_m5 >= s.minChM5 && (s.side === "bear" ? !s.copycatsOnly || t.gate?.some((g) => g.name === "Original" && !g.ok) : !!t.passed);
 }
 export function describeTrench(s: Trench) {
   if (s.side === "bear") return `Calls bearish on ${s.copycatsOnly ? "copycat tickers" : "tokens"} up to ${s.maxAgeH}h old between $${k(s.minFdv)} and $${k(s.maxFdv)} FDV. Closes at +${s.tp}% / -${s.sl}% or after ${s.maxHold}h. Fired at ${s.fireLine}% drawdown.`;

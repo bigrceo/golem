@@ -16,5 +16,5 @@ export default function NodeGrid({ lit = 24 }: { lit?: number }) {
     for (const p of pulses.current) { p.p += 0.04; const a = proj(p.i + p.d[0] * Math.floor(p.p), p.j + p.d[1] * Math.floor(p.p)), b = proj(p.i + p.d[0] * Math.ceil(p.p), p.j + p.d[1] * Math.ceil(p.p)); const f = p.p % 1; const px = a[0] + (b[0] - a[0]) * f, py = a[1] + (b[1] - a[1]) * f; const g = c.createRadialGradient(px, py, 0, px, py, 7 * dpr); g.addColorStop(0, "rgba(255,106,36,.95)"); g.addColorStop(1, "rgba(255,106,36,0)"); c.fillStyle = g; c.beginPath(); c.arc(px, py, 7 * dpr, 0, 6.2832); c.fill(); }
     while (pulses.current.length && pulses.current[0].p > 5) pulses.current.shift();
   }, [lit]);
-  return <canvas ref={ref} className="w-full h-full" aria-hidden />;
+  return <canvas ref={ref} className="w-full h-full fade-edges" aria-hidden />;
 }

@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { apiGet } from "@/lib/api";
+import { apiGet, getFloor } from "@/lib/api";
+import { HOUSE } from "@/lib/house";
+import { matches } from "@/lib/trench";
 import { marketRecord } from "@/lib/live";
 import { describeTrench, k, type Trench } from "@/lib/trench";
 import type { Spec } from "@/lib/rules";
@@ -24,8 +26,10 @@ const ago = (t: number) => { const m = (Date.now() - t) / 60000; return m < 60 ?
 
 export default async function AgentProfile({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const d = await apiGet<Resp>(`/agents/${slug}`, 60);
+  const d = (await apiGet<Resp>(`/agents/${slug}`, 60)) ?? ((): Resp | null => { const h = HOUSE.find((x) => x.slug === slug); return h ? ({ agent: { ...h, owner: "golem", fire_reason: null } } as unknown as Resp) : null; })();
   if (!d) notFound();
+  const fl = d.agent.kind === "trench" ? await getFloor() : null;
+  const live = fl ? fl.tokens.filter((t) => matches(d.agent.spec, t)).slice(0, 10) : [];
   const a = d.agent; const fired = !!a.fired_at;
   const rec = a.kind === "market" ? await marketRecord(a.spec, a.created_at) : null;
   const liveFired = rec?.live.fired;
@@ -43,7 +47,12 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
       <p className="mt-5 text-lg text-[var(--muted)] max-w-3xl">{a.spec.bio ?? (a.kind === "trench" ? describeTrench(a.spec) : rec?.describe)}</p>
       {(fired || liveFired) && <div className="mt-4 card p-4 border-[var(--down)] down text-sm font-semibold">Fired · {a.fire_reason ?? rec?.live.decisions.find((x) => x.action === "FIRED")?.reason}</div>}
 
-      {a.kind === "trench" && d.stats && <>
+      {a.kind === "trench" && !d.calls?.length && <div className="mt-8 card p-6">
+        <div className="label">Would call right now · {live.length} tokens on the floor</div>
+        <div className="mt-3 divide-y divide-[var(--line)]">{live.map((t) => (
+          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity · {t.buys_h1} buys / {t.sells_h1} sells</span><span className={`ml-auto font-bold num ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</span></a>))}</div>
+      </div>}
+      {a.kind === "trench" && d.stats && d.calls?.length ? <>
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[["Calls", String(d.stats.count), ""], ["Hit rate", `${d.stats.hit}%`, ""], ["Avg PnL", sgn(d.stats.avg), d.stats.avg >= 0 ? "up" : "down"], ["Paper vault", `$${d.stats.equity.toLocaleString("en-US")}`, d.stats.equity >= 10000 ? "up" : "down"]].map(([l, v, c]) => (
             <div key={l} className="card p-5"><div className="label mb-2">{l}</div><div className={`text-3xl font-bold num ${c}`}>{v}</div></div>))}
@@ -51,7 +60,7 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
         <div className="mt-5 grid lg:grid-cols-[1.4fr_1fr] gap-5">
           <div className="card p-6">
             <div className="label">Calls with receipts</div>
-            {!d.calls?.length && <p className="mt-4 text-sm text-[var(--muted)]">No call yet. It is scanning the floor every 5 minutes.</p>}
+
             <div className="mt-3 divide-y divide-[var(--line)]">
               {d.calls?.map((c) => (
                 <div key={c.id} className="py-3">
@@ -66,11 +75,11 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
             <div className="mt-3 divide-y divide-[var(--line)]">
               {d.checks?.slice(0, 14).map((c, i) => (
                 <div key={i} className="py-2.5 text-sm"><span className={`font-bold mr-2 ${c.passed ? "up" : "down"}`}>{c.passed ? "PASS" : "BLOCKED"}</span><b>${c.symbol}</b><span className="text-[var(--muted)]"> · {hhmm(c.t)}</span><div className="text-xs text-[var(--muted)] mt-0.5">{c.reason}</div></div>))}
-              {!d.checks?.length && <p className="py-3 text-sm text-[var(--muted)]">Nothing checked yet.</p>}
+
             </div>
           </div>
         </div>
-      </>}
+      </> : null}
 
       {rec && <>
         <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">

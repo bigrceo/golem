@@ -3,7 +3,7 @@
  * prices them with DexScreener, runs the Gate, lets trench agents call tokens with receipts,
  * closes calls on their rules and fires agents that cross their line. Cron every 5 minutes.
  */
-export interface Env { DB: D1Database; RPC: string; SECRET: string; WEB: string }
+export interface Env { DB: D1Database; RPC: string; SECRET: string; WEB: string; SNAP: KVNamespace }
 
 const PM = "0x8366a39CC670B4001A1121B8F6A443A643e40951";
 const INIT = "0xdd466e674ea557f56295e2d0218a125ea4b4f0f6f3307b95f85e6110838d6438";
@@ -194,6 +194,9 @@ async function handle(req: Request, env: Env): Promise<Response> {
   if (req.method === "OPTIONS") return new Response(null, { headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type, x-hire-secret", "access-control-allow-methods": "GET, POST" } });
   if (p === "/" || p === "/health") return json({ ok: true, block: await meta(env, "block"), lastRun: await meta(env, "lastRun") });
 
+  if (p === "/floor" && !url.searchParams.has("fresh")) { const v = await env.SNAP.get("floor"); if (v) return new Response(v, { headers: { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "public, max-age=60" } }); }
+  if (p === "/agents" && req.method === "GET" && !url.searchParams.has("fresh")) { const v = await env.SNAP.get("agents"); if (v) return new Response(JSON.stringify({ agents: (JSON.parse(v) as { agents: unknown[] }).agents }), { headers: { "content-type": "application/json", "access-control-allow-origin": "*", "cache-control": "public, max-age=60" } }); }
+  { const mm = p.match(/^\/agents\/([a-z0-9-]+)$/); if (mm && req.method === "GET" && !url.searchParams.has("fresh")) { const v = await env.SNAP.get("agents"); if (v) { const d = (JSON.parse(v) as { detail: Record<string, unknown> }).detail[mm[1]]; if (d) return json(d); } } }
   if (p === "/floor") {
     const now = Date.now();
     const toks = (await env.DB.prepare("select token, pair, symbol, name, created, price, fdv, liq, buys_h1, sells_h1, ch_m5, ch_h1, ch_h24, vol_h24, image, passed, gate from tokens where price > 0 and liq >= 1000 and created > ? order by passed desc, vol_h24 desc limit 60").bind(now - 72 * H).all<Tok>()).results;
@@ -230,6 +233,7 @@ async function handle(req: Request, env: Env): Promise<Response> {
     if ((today?.n ?? 0) >= 10) return json({ error: "10 agents a day per visitor" }, 429);
     const r = await env.DB.prepare("insert into agents (slug, name, kind, spec, owner, created_at, ip) values (?, ?, ?, ?, ?, ?, ?) on conflict(slug) do nothing").bind(b.slug, b.name, b.kind, JSON.stringify(b.spec), (b.owner ?? "anon").slice(0, 42), Date.now(), b.ip ?? "").run();
     if (!r.meta.changes) return json({ error: "taken" }, 409);
+    try { const v = await env.SNAP.get("agents"); if (v) { const snap = JSON.parse(v); const row = { slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: b.owner ?? "anon", created_at: Date.now(), fired_at: null, fire_reason: null, house: 0 }; snap.agents.push(row); snap.detail[b.slug] = { agent: row }; await env.SNAP.put("agents", JSON.stringify(snap)); } } catch {}
     return json({ ok: true, slug: b.slug });
   }
   if (p === "/run" && req.headers.get("x-hire-secret") === env.SECRET) return json(await tick(env));
@@ -246,12 +250,24 @@ async function handle(req: Request, env: Env): Promise<Response> {
   return json({ error: "not found" }, 404);
 }
 
+async function snapshot(env: Env) {
+  const base = "https://snap.local";
+  const floor = await handle(new Request(base + "/floor?fresh=1"), env).then((r) => r.text());
+  const list = (await handle(new Request(base + "/agents?fresh=1"), env).then((r) => r.json())) as { agents: { slug: string }[] };
+  const detail: Record<string, unknown> = {};
+  for (const a of list.agents) detail[a.slug] = await handle(new Request(base + "/agents/" + a.slug + "?fresh=1"), env).then((r) => r.json());
+  await env.SNAP.put("floor", floor);
+  await env.SNAP.put("agents", JSON.stringify({ agents: list.agents, detail }));
+}
+
 async function tick(env: Env) {
   await seedHouse(env);
+  await env.DB.prepare("delete from tokens where first_seen < ? and (liq is null or liq < 1000) and token not in (select token from calls)").bind(Date.now() - 96 * H).run();
   let d: unknown; try { d = await discover(env); } catch (e) { d = { error: String(e).slice(0, 400) }; }
   const r = await refresh(env);
   const a = await runAgents(env, r.toks, r.bigBySymbol);
   await setMeta(env, "lastRun", String(Date.now()));
+  await snapshot(env);
   return { discover: d, tracked: r.tracked, priced: r.priced, agents: a };
 }
 

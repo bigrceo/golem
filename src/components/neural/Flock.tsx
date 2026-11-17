@@ -8,7 +8,7 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const B = useMemo(() => { let s = 11; const r = () => ((s = (s * 16807) % 2147483647) / 2147483647); return Array.from({ length: 600 }, () => ({ x: 0.3 + r() * 0.4, y: 0.3 + r() * 0.3, vx: (r() - 0.5) * 0.004, vy: (r() - 0.5) * 0.004 })); }, []);
   useCanvasLoop(ref, (c, w, h, t, dpr) => {
-    c.fillStyle = "rgba(7,8,7,.3)"; c.fillRect(0, 0, w, h);
+    c.globalCompositeOperation = "destination-out"; c.fillStyle = "rgba(0,0,0,.3)"; c.fillRect(0, 0, w, h); c.globalCompositeOperation = "source-over";
     const S = Math.min(w, h * 0.82), ox = (w - S) / 2, oy = h * 0.04;
     const ax = 0.5 + 0.22 * Math.sin(t * 0.37), ay = 0.45 + 0.16 * Math.sin(t * 0.74);
     const cell = new Map<string, typeof B>(); const key = (x: number, y: number) => ((x * 12) | 0) + "," + ((y * 12) | 0);
@@ -29,5 +29,5 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([i, j], k) => { const X = mx + i * S * (0.2 + 0.015 * Math.sin(t * 2 + k)), Y = my + j * S * (0.18 + 0.015 * Math.cos(t * 2 + k)); c.beginPath(); c.moveTo(X - 6 * dpr * i, Y); c.lineTo(X, Y); c.lineTo(X, Y - 6 * dpr * j); c.stroke(); });
     c.fillStyle = "#d8d3c6"; c.font = `700 ${S * 0.06}px Sora, sans-serif`; c.textAlign = "center"; c.fillText(label, w / 2, oy + S + S * 0.07);
   });
-  return <canvas ref={ref} className="w-full h-full" aria-hidden />;
+  return <canvas ref={ref} className="w-full h-full fade-edges" aria-hidden />;
 }
