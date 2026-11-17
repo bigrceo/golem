@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import TokenLogo from "@/components/TokenLogo";
 import NeuralOrb from "@/components/neural/NeuralOrb";
 
-type Row = { token: string; symbol: string; name: string; fdv: number; ch24: number; buys: number; sells: number; held: boolean; holdMin: number | null; lastIn: number };
+type Row = { token: string; symbol: string; name: string; image: string | null; fdv: number; ch24: number; buys: number; sells: number; held: boolean; holdMin: number | null; lastIn: number };
 type Prof = { wallet: string; trades: number; tokens: number; holding: number; medianHoldMin: number | null; style: string; rows: Row[]; error?: string };
 const k = (n: number) => (n >= 1e6 ? `$${(n / 1e6).toFixed(1)}M` : `$${(n / 1e3).toFixed(1)}K`);
 const dur = (m: number) => (m < 60 ? `${Math.round(m)} min` : `${(m / 60).toFixed(1)} h`);
@@ -53,7 +53,7 @@ export default function CopyWallet() {
           <div className="card p-2">
             {p.rows.slice(0, 14).map((r) => (
               <div key={r.token} className="flex items-center gap-3 p-3 border-b border-white/5 last:border-0">
-                <TokenLogo addr={r.token} symbol={r.symbol} size={32} />
+                <TokenLogo addr={r.token} symbol={r.symbol} image={r.image} size={32} />
                 <div className="flex-1 min-w-0"><div className="font-semibold">${r.symbol}</div><div className="text-sm opacity-60 truncate">{r.held ? "Holding" : r.holdMin != null ? `Held ${dur(r.holdMin)}` : "Traded"} · {k(r.fdv)} FDV</div></div>
                 <div className={r.ch24 >= 0 ? "up" : "down"}>{r.ch24 >= 0 ? "+" : ""}{r.ch24.toFixed(0)}%</div>
               </div>))}

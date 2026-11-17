@@ -165,9 +165,9 @@ export default function Studio() {
               <div className="flex items-center justify-between"><div className="label">Backtest · last 720 hourly candles · not a live record</div><span className="text-xs text-[var(--muted)]">{loading ? "running…" : "real prices"}</span></div>
               {bt && <>
                 <p className="mt-3 text-sm">{bt.describe}</p>
-                <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="mt-6 stats">
                   {[["Return", sgn(bt.ret), bt.ret >= 0 ? "up" : "down"], [`Holding ${spec.market}`, sgn(bt.hold), ""], ["Edge", sgn(bt.edge), bt.edge >= 0 ? "up" : "down"], ["Max drawdown", `${bt.maxDD}%`, ""]].map(([l, v, c]) => (
-                    <div key={l} className="card-soft p-3"><div className={`text-xl font-bold num ${c}`}>{v}</div><div className="text-xs text-[var(--muted)]">{l}</div></div>
+                    <div key={l}><div className={`display text-2xl font-semibold num ${c}`}>{v}</div><div className="text-[13px] text-[var(--muted)] mt-1">{l}</div></div>
                   ))}
                 </div>
                 <div className="mt-5 relative">

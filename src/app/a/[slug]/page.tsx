@@ -58,9 +58,9 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
           <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity · {t.buys_h1} buys / {t.sells_h1} sells</span><span className={`ml-auto font-bold num ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</span></a>))}</div>
       </div>}
       {a.kind === "trench" && d.stats && d.calls?.length ? <>
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-8 stats border-y border-[var(--line)] py-6">
           {[["Calls", String(d.stats.count), ""], ["Hit rate", `${d.stats.hit}%`, ""], ["Avg PnL", sgn(d.stats.avg), d.stats.avg >= 0 ? "up" : "down"], ["Paper vault", `$${d.stats.equity.toLocaleString("en-US")}`, d.stats.equity >= 10000 ? "up" : "down"]].map(([l, v, c]) => (
-            <div key={l} className="card p-5"><div className="label mb-2">{l}</div><div className={`text-3xl font-bold num ${c}`}>{v}</div></div>))}
+            <div key={l}><div className="label mb-1">{l}</div><div className={`display text-3xl font-semibold num ${c}`}>{v}</div></div>))}
         </div>
         <div className="mt-5 grid lg:grid-cols-[1.4fr_1fr] gap-5">
           <div className="card p-6">
@@ -87,9 +87,9 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
       </> : null}
 
       {rec && <>
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-8 stats border-y border-[var(--line)] py-6">
           {[["Since launch", sgn(rec.live.ret), rec.live.ret >= 0 ? "up" : "down"], [`Holding ${a.spec.market}`, sgn(rec.live.hold), ""], ["30-day backtest edge", sgn(rec.backtest.edge), rec.backtest.edge >= 0 ? "up" : "down"], ["Backtest drawdown", `${rec.backtest.maxDD}%`, ""]].map(([l, v, c]) => (
-            <div key={l} className="card p-5"><div className="label mb-2">{l}</div><div className={`text-3xl font-bold num ${c}`}>{v}</div></div>))}
+            <div key={l}><div className="label mb-1">{l}</div><div className={`display text-3xl font-semibold num ${c}`}>{v}</div></div>))}
         </div>
         <div className="mt-5 grid lg:grid-cols-[1fr_1fr] gap-5">
           <div className="card p-6"><div className="label mb-4">30-day backtest vs holding</div>

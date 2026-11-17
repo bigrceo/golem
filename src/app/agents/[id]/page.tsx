@@ -32,9 +32,9 @@ export default async function AgentPage({ params }: { params: Promise<{ id: stri
           </div>
           <p className="mt-6 text-lg text-[var(--muted)] max-w-2xl">{a.pitch}</p>
 
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[[signed(a.pnl), "7-day return", a.pnl >= 0 ? "up" : "down"], [signed(a.holdPnl), `holding ${a.markets[0]}`, ""], [signed(a.edge), "edge", a.edge >= 0 ? "up" : "down"], [`${a.maxDrawdown}%`, `max drawdown · fired at ${(a.fireAt * 100).toFixed(0)}%`, ""]].map(([v, l, c]) => (
-              <div key={l} className="card p-4"><div className={`text-2xl font-bold num ${c}`}>{v}</div><div className="text-xs text-[var(--muted)]">{l}</div></div>
+          <div className="mt-8 stats">
+            {[[signed(a.pnl), "7-day return", a.pnl >= 0 ? "up" : "down"], [signed(a.holdPnl), `holding ${a.markets[0]}`, ""], [signed(a.edge), "edge", a.edge >= 0 ? "up" : "down"], [`${a.maxDrawdown}%`, `max drawdown · safety line ${(a.fireAt * 100).toFixed(0)}%`, ""]].map(([v, l, c]) => (
+              <div key={l}><div className={`display text-3xl font-semibold num ${c}`}>{v}</div><div className="text-[13px] text-[var(--muted)] mt-1">{l}</div></div>
             ))}
           </div>
           <div className="card p-5 mt-4">

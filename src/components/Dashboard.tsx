@@ -79,7 +79,7 @@ export default function Dashboard() {
     <Shell>
       <div className="grid lg:grid-cols-[1.1fr_1fr] gap-5">
         <div className="card p-8 md:p-10">
-          <div className="label mb-3">Step 1</div>
+          
           <h2 className="text-3xl md:text-4xl font-bold">Open your paper vault.</h2>
           <p className="mt-3 text-[var(--muted)] max-w-md">Real prices, virtual USDG. Hire agents, set their safety lines, watch them work. No wallet, no gas, nothing to fund.</p>
           <label className="block mt-8 text-sm"><span className="text-[var(--muted)]">Starting balance</span>
@@ -87,10 +87,10 @@ export default function Dashboard() {
           </label>
           <button onClick={() => commit({ createdAt: Date.now(), deposit, hires: [] })} className="btn btn-accent mt-8">Open vault</button>
         </div>
-        <div className="card-soft p-8 md:p-10">
+        <div className="p-2 md:p-6 lg:pl-10 lg:border-l border-[var(--line)]">
           <div className="label mb-5">How the vault works</div>
           {[["Hire", "Pick an agent, give it part of the vault, set its safety line."], ["Watch", "It trades its market on live prices. Every call shows up in your log with the reason."], ["Stay in control", "It stops on its own at its safety line. Or pause it yourself, anytime."]].map(([t, d], i) => (
-            <div key={t} className="flex gap-4 mb-6 last:mb-0"><div className="icon-box num text-sm shrink-0">0{i + 1}</div><div><div className="font-bold">{t}</div><p className="text-sm text-[var(--muted)] mt-1">{d}</p></div></div>
+            <div key={t} className="py-4 border-t border-[var(--line)] first:border-t-0 first:pt-0"><div><div className="font-bold">{t}</div><p className="text-sm text-[var(--muted)] mt-1">{d}</p></div></div>
           ))}
         </div>
       </div>
@@ -100,9 +100,9 @@ export default function Dashboard() {
   return (
     <Shell right={<button onClick={() => { if (confirm("Close this paper vault and start over?")) commit(null); }} className="btn btn-ghost !py-2 !px-4 text-sm">Reset vault</button>}>
       {/* SUMMARY */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="stats border-y border-[var(--line)] py-6">
         {[["Vault value", money(total), ""], ["Since opening", `${pnl >= 0 ? "+" : ""}${money(pnl)}`, pnl >= 0 ? "up" : "down"], ["Free to allocate", money(free), ""], ["Agents", `${active.length} working · ${closed.length} paused`, ""]].map(([l, v, c]) => (
-          <div key={l} className="card p-5"><div className="label mb-3">{l}</div><div className={`text-2xl font-bold num ${c}`}>{v}</div></div>
+          <div key={l}><div className="label mb-1">{l}</div><div className={`display text-2xl font-semibold num ${c}`}>{v}</div></div>
         ))}
       </div>
 

@@ -15,9 +15,9 @@ export default async function FloorPage() {
     <main className="mx-auto max-w-7xl px-5 py-10">
       <div className="label mb-2 flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-[var(--up)] blink" />The floor · Robinhood Chain</div>
       <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 items-center"><h1 className="text-4xl md:text-6xl font-bold">Every new pool, read from the chain, run through the Gate.</h1><div className="hidden lg:block h-56"><NodeGrid lit={Math.min(160, d.stats?.tracked ?? 40)} /></div></div>
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
+      <div className="mt-8 stats border-y border-[var(--line)] py-6">
         {([["Pools seen", d.stats?.pools], ["Live tokens", d.stats?.tracked], ["Calls", d.stats?.calls], ["Pass the Gate", d.stats?.passed], ["Blocked by the Gate", d.stats?.blocked]] as [string, number | undefined][]).filter(([, v]) => !!v).map(([l, v]) => (
-          <div key={l as string} className="card p-5"><div className="label mb-2">{l}</div><div className="text-3xl font-bold num">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
+          <div key={l as string}><div className="label mb-1">{l}</div><div className="display text-3xl font-semibold num">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
       </div>
       <div className="mt-5 grid lg:grid-cols-[1.6fr_1fr] gap-5">
         <div className="card p-0 overflow-x-auto">

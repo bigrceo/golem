@@ -18,8 +18,8 @@ export default function HowLayers() {
           <h2 className="text-4xl md:text-5xl font-bold">An agent, built in three layers.</h2>
           <div className="mt-8 space-y-3">
             {LAYERS.map(([t, k, d], i) => (
-              <div key={t} className={`card p-5 transition-all duration-500 ${on === i ? "opacity-100 translate-x-0 !border-[rgba(255,106,36,.5)]" : "opacity-45 -translate-x-1"}`}>
-                <div className="flex items-baseline gap-3"><span className="brand font-bold num">0{i + 1}</span><b className="text-lg">{t}</b><span className="label">{k}</span></div>
+              <div key={t} className={`pl-5 py-3 border-l-2 transition-all duration-500 ${on === i ? "opacity-100 border-[var(--brand)]" : "opacity-45 border-[var(--line)]"}`}>
+                <div className="flex items-baseline gap-3"><b className="text-lg">{t}</b><span className="label">{k}</span></div>
                 <p className={`text-sm text-[var(--muted)] mt-2 leading-relaxed ${on === i ? "" : "hidden md:block"}`}>{d}</p>
               </div>))}
           </div>

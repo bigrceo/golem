@@ -79,9 +79,9 @@ export default async function Home() {
       </section>
 
       <section className="mx-auto max-w-[1280px] px-5 mt-5">
-        <Reveal><div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Reveal><div className="stats border-y border-[var(--line)] py-7">
           {([["Pools read", s?.pools], ["Live tokens", s?.tracked], ["Calls on record", s?.calls], ["Pass the Gate", s?.passed], ["Blocked by the Gate", s?.blocked]] as [string, number | undefined][]).filter(([, v]) => !!v).slice(0, 4).map(([l, v]) => (
-            <div key={l as string} className="card p-5 flex flex-col justify-between"><div className="label">{l}</div><div className="text-4xl font-bold num mt-4">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
+            <div key={l as string} ><div className="label">{l}</div><div className="display text-4xl font-semibold num mt-2">{(v as number | undefined)?.toLocaleString("en-US") ?? "…"}</div></div>))}
         </div></Reveal>
       </section>
 

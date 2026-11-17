@@ -27,7 +27,7 @@ export default function Flock({ label = "THE GATE" }: { label?: string }) {
     c.strokeStyle = "#ff6a24"; c.lineWidth = 2 * dpr; c.beginPath(); c.ellipse(mx, my, S * 0.19, S * 0.17, t * 0.4, 0, Math.PI * 2); c.stroke();
     c.strokeStyle = "#f5f1e8"; c.lineWidth = dpr;
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([i, j], k) => { const X = mx + i * S * (0.2 + 0.015 * Math.sin(t * 2 + k)), Y = my + j * S * (0.18 + 0.015 * Math.cos(t * 2 + k)); c.beginPath(); c.moveTo(X - 6 * dpr * i, Y); c.lineTo(X, Y); c.lineTo(X, Y - 6 * dpr * j); c.stroke(); });
-    c.fillStyle = "#d8d3c6"; c.font = `700 ${S * 0.06}px Sora, sans-serif`; c.textAlign = "center"; c.fillText(label, w / 2, oy + S + S * 0.07);
+    c.fillStyle = "#d8d3c6"; c.font = `700 ${S * 0.06}px 'Inter Tight', Inter, sans-serif`; c.textAlign = "center"; c.fillText(label, w / 2, oy + S + S * 0.07);
   });
   return <canvas ref={ref} className="w-full h-full fade-edges" aria-hidden />;
 }
