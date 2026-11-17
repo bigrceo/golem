@@ -36,7 +36,8 @@ export async function POST(req: Request) {
     const r = await fetch(API + "/agents", { method: "POST", headers: { "content-type": "application/json", "x-hire-secret": process.env.HIRE_API_SECRET ?? "" }, body: JSON.stringify({ slug, name, kind: b.kind, spec, owner: (b.owner ?? "anon").slice(0, 42), ip }) });
     const j = await r.json().catch(() => ({ error: "api down" }));
     if (r.status === 409) continue;
-    return NextResponse.json(j, { status: r.status });
+    if (r.ok || r.status === 400 || r.status === 429) return NextResponse.json(j, { status: r.status });
+    return NextResponse.json({ error: "Busy launching agents right now, try again in a few seconds." }, { status: 503 });
   }
   return NextResponse.json({ error: "Name taken, try another." }, { status: 409 });
 }

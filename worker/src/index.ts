@@ -244,13 +244,22 @@ async function handle(req: Request, env: Env): Promise<Response> {
     const b = (await req.json().catch(() => null)) as { slug?: string; name?: string; kind?: string; spec?: unknown; owner?: string; ip?: string } | null;
     if (!b?.slug || !SLUG.test(b.slug) || !b.name || b.name.length > 32 || !["trench", "market"].includes(b.kind ?? "") || !b.spec) return json({ error: "bad input" }, 400);
     if (HOUSE.some((h) => h.slug === b.slug)) return json({ error: "taken" }, 409);
-    const today = await env.DB.prepare("select count(*) as n from agents where ip = ? and created_at > ?").bind(b.ip ?? "", Date.now() - 24 * H).first<{ n: number }>();
-    if ((today?.n ?? 0) >= 10) return json({ error: "10 agents a day per visitor" }, 429);
-    const r = await env.DB.prepare("insert into agents (slug, name, kind, spec, owner, created_at, ip) values (?, ?, ?, ?, ?, ?, ?) on conflict(slug) do nothing").bind(b.slug, b.name, b.kind, JSON.stringify(b.spec), (b.owner ?? "anon").slice(0, 42), Date.now(), b.ip ?? "").run();
-    if (!r.meta.changes) return json({ error: "taken" }, 409);
-    const par = (b.spec as { parent?: string; version?: number }).parent; const ver = (b.spec as { version?: number }).version;
-    if (par) await env.DB.prepare("update agents set fired_at=?, fire_reason=? where slug=? and fired_at is null").bind(Date.now(), `record frozen · v${ver} is live as @${b.slug}`, par).run();
-    try { const v = await env.SNAP.get("agents"); if (v) { const snap = JSON.parse(v); const row = { slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: b.owner ?? "anon", created_at: Date.now(), fired_at: null, fire_reason: null, house: 0 }; snap.agents.push(row); snap.detail[b.slug] = { agent: row }; const par2 = (b.spec as { parent?: string }).parent; if (par2) for (const x of snap.agents) if (x.slug === par2 && !x.fired_at) { x.fired_at = Date.now(); x.fire_reason = `record frozen · new version @${b.slug}`; } await env.SNAP.put("agents", JSON.stringify(snap)); } } catch {}
+    try {
+      const today = await env.DB.prepare("select count(*) as n from agents where ip = ? and created_at > ?").bind(b.ip ?? "", Date.now() - 24 * H).first<{ n: number }>();
+      if ((today?.n ?? 0) >= 10) return json({ error: "10 agents a day per visitor" }, 429);
+      const r = await env.DB.prepare("insert into agents (slug, name, kind, spec, owner, created_at, ip) values (?, ?, ?, ?, ?, ?, ?) on conflict(slug) do nothing").bind(b.slug, b.name, b.kind, JSON.stringify(b.spec), (b.owner ?? "anon").slice(0, 42), Date.now(), b.ip ?? "").run();
+      if (!r.meta.changes) return json({ error: "taken" }, 409);
+      const par = (b.spec as { parent?: string; version?: number }).parent; const ver = (b.spec as { version?: number }).version;
+      if (par) await env.DB.prepare("update agents set fired_at=?, fire_reason=? where slug=? and fired_at is null").bind(Date.now(), `record frozen · v${ver} is live as @${b.slug}`, par).run();
+    } catch (e) {
+      if (String(e).includes("taken")) throw e;
+      // D1 unavailable (daily quota): keep the agent in KV, migrated by the cron once D1 is back.
+      const pend = JSON.parse((await env.SNAP.get("pending-agents")) ?? "[]") as { slug: string }[];
+      if (pend.some((x) => x.slug === b.slug)) return json({ error: "taken" }, 409);
+      pend.push({ slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: (b.owner ?? "anon").slice(0, 42), created_at: Date.now(), ip: b.ip ?? "" } as never);
+      await env.SNAP.put("pending-agents", JSON.stringify(pend));
+    }
+    await patchSnap(env, b as { slug: string; name: string; kind: string; spec: unknown; owner?: string });
     return json({ ok: true, slug: b.slug });
   }
   if (p === "/run" && req.headers.get("x-hire-secret") === env.SECRET) return json(await tick(env));
@@ -267,6 +276,24 @@ async function handle(req: Request, env: Env): Promise<Response> {
   return json({ error: "not found" }, 404);
 }
 
+async function patchSnap(env: Env, b: { slug: string; name: string; kind: string; spec: unknown; owner?: string }) {
+  try {
+    const snap = JSON.parse((await env.SNAP.get("agents")) ?? '{"agents":[],"detail":{}}');
+    if (snap.agents.some((x: { slug: string }) => x.slug === b.slug)) return;
+    const row = { slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: b.owner ?? "anon", created_at: Date.now(), fired_at: null, fire_reason: null, house: 0 };
+    snap.agents.push(row); snap.detail[b.slug] = { agent: row, calls: [], stats: null };
+    const par = (b.spec as { parent?: string }).parent; if (par) for (const x of snap.agents) if (x.slug === par && !x.fired_at) { x.fired_at = Date.now(); x.fire_reason = `record frozen · new version @${b.slug}`; }
+    await env.SNAP.put("agents", JSON.stringify(snap));
+  } catch {}
+}
+
+async function migratePending(env: Env) {
+  const v = await env.SNAP.get("pending-agents"); if (!v) return 0;
+  const pend = JSON.parse(v) as { slug: string; name: string; kind: string; spec: unknown; owner: string; created_at: number; ip: string }[]; if (!pend.length) return 0;
+  await env.DB.batch(pend.map((a) => env.DB.prepare("insert into agents (slug, name, kind, spec, owner, created_at, ip) values (?, ?, ?, ?, ?, ?, ?) on conflict(slug) do nothing").bind(a.slug, a.name, a.kind, JSON.stringify(a.spec), a.owner, a.created_at, a.ip)));
+  await env.SNAP.delete("pending-agents"); return pend.length;
+}
+
 async function snapshot(env: Env) {
   const base = "https://snap.local";
   const floor = await handle(new Request(base + "/floor?fresh=1"), env).then((r) => r.text());
@@ -278,6 +305,7 @@ async function snapshot(env: Env) {
 }
 
 async function tick(env: Env) {
+  await migratePending(env);
   await seedHouse(env);
   await env.DB.prepare("delete from tokens where first_seen < ? and (liq is null or liq < 1000) and token not in (select token from calls)").bind(Date.now() - 96 * H).run();
   let d: unknown; try { d = await discover(env); } catch (e) { d = { error: String(e).slice(0, 400) }; }
