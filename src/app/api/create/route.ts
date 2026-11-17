@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 const clamp = (v: unknown, a: number, b: number, d: number) => { const n = Number(v); return Number.isFinite(n) ? Math.min(b, Math.max(a, n)) : d; };
 
 export async function POST(req: Request) {
-  const b = await req.json().catch(() => null) as { name?: string; kind?: string; spec?: Spec & Trench; owner?: string } | null;
+  const b = await req.json().catch(() => null) as { name?: string; kind?: string; spec?: Spec & Trench; owner?: string; parent?: string; version?: number } | null;
   const name = (b?.name ?? "").trim().replace(/[^\p{L}\p{N} ._-]/gu, "").slice(0, 24);
   if (!name || name.length < 2) return NextResponse.json({ error: "Give your agent a name (2–24 characters)." }, { status: 400 });
   let spec: unknown;
@@ -27,7 +27,9 @@ export async function POST(req: Request) {
     spec = { universe: "trenches", side: "bull", copy: { wallet: w }, maxAgeH: 72, minLiq: 3000, minFdv: 1000, maxFdv: 1e9, minBuysH1: 0, minBuyRatio: 0, minChH1: -100, maxChH1: 10000, minChM5: -100, tp: clamp((b.spec as Trench)?.tp, 5, 500, 50), sl: clamp((b.spec as Trench)?.sl, 5, 90, 30), maxHold: 24, fireLine: 30 };
     b.kind = "trench";
   } else return NextResponse.json({ error: "bad kind" }, { status: 400 });
-  const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 18) || "agent";
+  const parent = /^[a-z0-9-]{2,40}$/.test(b.parent ?? "") ? b.parent! : null; const version = parent ? clamp(b.version, 2, 99, 2) : 1;
+  if (parent) Object.assign(spec as object, { parent, version });
+  const base = parent ? `${parent.replace(/-v\d+$/, "").slice(0, 14)}-v${version}` : name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 18) || "agent";
   const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim();
   for (let i = 0; i < 3; i++) {
     const slug = i === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 5)}`;

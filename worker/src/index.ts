@@ -248,7 +248,9 @@ async function handle(req: Request, env: Env): Promise<Response> {
     if ((today?.n ?? 0) >= 10) return json({ error: "10 agents a day per visitor" }, 429);
     const r = await env.DB.prepare("insert into agents (slug, name, kind, spec, owner, created_at, ip) values (?, ?, ?, ?, ?, ?, ?) on conflict(slug) do nothing").bind(b.slug, b.name, b.kind, JSON.stringify(b.spec), (b.owner ?? "anon").slice(0, 42), Date.now(), b.ip ?? "").run();
     if (!r.meta.changes) return json({ error: "taken" }, 409);
-    try { const v = await env.SNAP.get("agents"); if (v) { const snap = JSON.parse(v); const row = { slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: b.owner ?? "anon", created_at: Date.now(), fired_at: null, fire_reason: null, house: 0 }; snap.agents.push(row); snap.detail[b.slug] = { agent: row }; await env.SNAP.put("agents", JSON.stringify(snap)); } } catch {}
+    const par = (b.spec as { parent?: string; version?: number }).parent; const ver = (b.spec as { version?: number }).version;
+    if (par) await env.DB.prepare("update agents set fired_at=?, fire_reason=? where slug=? and fired_at is null").bind(Date.now(), `record frozen · v${ver} is live as @${b.slug}`, par).run();
+    try { const v = await env.SNAP.get("agents"); if (v) { const snap = JSON.parse(v); const row = { slug: b.slug, name: b.name, kind: b.kind, spec: b.spec, owner: b.owner ?? "anon", created_at: Date.now(), fired_at: null, fire_reason: null, house: 0 }; snap.agents.push(row); snap.detail[b.slug] = { agent: row }; const par2 = (b.spec as { parent?: string }).parent; if (par2) for (const x of snap.agents) if (x.slug === par2 && !x.fired_at) { x.fired_at = Date.now(); x.fire_reason = `record frozen · new version @${b.slug}`; } await env.SNAP.put("agents", JSON.stringify(snap)); } } catch {}
     return json({ ok: true, slug: b.slug });
   }
   if (p === "/run" && req.headers.get("x-hire-secret") === env.SECRET) return json(await tick(env));

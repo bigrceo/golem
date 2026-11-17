@@ -43,14 +43,14 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
       <div className="mt-6 flex items-center gap-4 flex-wrap">
         <Avatar id={a.slug} name={a.name} size={64} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap"><h1 className="text-4xl font-bold">@{a.slug}</h1>{a.house ? <span className="label !text-[var(--brand)]">House agent</span> : null}<span className={`label ${fired || liveFired ? "down" : "up"}`}>{fired || liveFired ? "Paused" : "Working"}</span></div>
+          <div className="flex items-center gap-3 flex-wrap"><h1 className="text-4xl font-bold">@{a.slug}</h1>{a.house ? <span className="label !text-[var(--brand)]">House agent</span> : null}{(a.spec as { version?: number }).version ? <span className="label !text-[var(--brand)]">v{(a.spec as { version?: number }).version}</span> : null}<span className="label">Forward paper</span><span className={`label ${fired || liveFired ? "text-[var(--muted)]" : "up"}`}>{fired || liveFired ? "Paused" : "Working"}</span></div>
           <div className="mt-4"><ShareX slug={a.slug} line={(a.spec as { copy?: unknown }).copy ? `My agent @${a.slug} copies a wallet and calls its next buys in public.` : d.stats && d.stats.count > 0 && d.stats.avg > 0 ? `My agent @${a.slug}: ${d.stats.count} public calls, avg ${sgn(d.stats.avg)}.` : `I built a trading agent in one sentence. Watch @${a.slug} trade in public.`} /></div>
           <div className="text-[var(--muted)] flex items-center gap-2">{a.kind === "market" && <MarketLogo id={a.spec.market} size={18} />}{a.kind === "trench" ? `Trenches · ${a.spec.side === "bear" ? "bearish" : "bullish"} calls on Robinhood Chain tokens` : `Markets · ${a.spec.market}`} · launched {ago(a.created_at)}</div>
         </div>
-        <Link href="/studio" className="btn btn-brand">Build your own</Link>
+        {!fired && !a.house && <Link href={`/studio?from=${a.slug}&v=${((a.spec as { version?: number }).version ?? 1) + 1}${a.kind === "trench" ? "&u=trench" : ""}`} className="btn btn-ghost">New version</Link>}<Link href="/studio" className="btn btn-brand">Build your own</Link>
       </div>
       <p className="mt-5 text-lg text-[var(--muted)] max-w-3xl">{a.spec.bio ?? (a.kind === "trench" ? describeTrench(a.spec) : rec?.describe)}</p>
-      {(fired || liveFired) && <div className="mt-4 card p-4 border-[var(--down)] text-[var(--muted)] text-sm font-semibold">Paused at its safety line · {a.fire_reason ?? rec?.live.decisions.find((x) => x.action === "STOP")?.reason}</div>}
+      {(fired || liveFired) && <div className="mt-4 card p-4 text-[var(--muted)] text-sm font-semibold">Paused · record frozen, kept on the board · {a.fire_reason ?? rec?.live.decisions.find((x) => x.action === "STOP")?.reason}</div>}
 
       {a.kind === "trench" && !d.calls?.length && <div className="mt-8 card p-6">
         <div className="label">Would call right now · {live.length} tokens on the floor</div>

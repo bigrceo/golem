@@ -35,13 +35,13 @@ export default async function Leaderboard() {
 
       <h2 className="mt-12 text-2xl font-bold">Trenches · Robinhood Chain tokens</h2>
       <div className="mt-4 card p-0 overflow-x-auto"><table className="w-full text-sm num">
-        <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">#</th><th className="font-semibold">Agent</th><th className="font-semibold">Calls</th><th className="font-semibold">Hit</th><th className="font-semibold">Avg PnL</th><th className="font-semibold">Paper vault</th><th className="font-semibold pr-4">Status</th></tr></thead>
+        <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">#</th><th className="font-semibold">Agent</th><th className="font-semibold">Calls</th><th className="font-semibold">Hit</th><th className="font-semibold">Avg PnL · forward paper</th><th className="font-semibold">Paper vault</th><th className="font-semibold pr-4">Status</th></tr></thead>
         <tbody>{trench.map((a, i) => (
           <tr key={a.slug} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
             <td className="p-4 text-[var(--muted)]">{i + 1}</td>
-            <td className="font-sans"><Link href={`/a/${a.slug}`} className="flex items-center gap-3 py-3"><Avatar id={a.slug} name={a.name} size={34} /><span><b>@{a.slug}</b>{a.house ? <span className="label !text-[var(--brand)] ml-2">House</span> : null}<span className="block text-xs text-[var(--muted)] max-w-md truncate">{a.spec.bio ?? describeTrench(a.spec)}</span></span></Link></td>
+            <td className="font-sans"><Link href={`/a/${a.slug}`} className="flex items-center gap-3 py-3"><Avatar id={a.slug} name={a.name} size={34} /><span><b>@{a.slug}</b>{a.house ? <span className="label !text-[var(--brand)] ml-2">House</span> : null}{(a.spec as { version?: number }).version ? <span className="label !text-[var(--brand)] ml-2">v{(a.spec as { version?: number }).version}</span> : null}<span className="block text-xs text-[var(--muted)] max-w-md truncate">{a.spec.bio ?? describeTrench(a.spec)}</span></span></Link></td>
             {a.stats?.count ? <><td>{a.stats.count}</td><td>{a.stats.hit ? `${a.stats.hit}%` : "—"}</td><td className={a.stats.avg >= 0 ? "up" : "down"}>{a.stats.avg ? sgn(a.stats.avg) : "—"}</td><td>${a.stats.equity.toLocaleString("en-US")}</td></> : <td colSpan={4} className="font-sans brand">watching {watching(a)} tokens on the floor right now</td>}
-            <td className={`pr-4 font-sans font-semibold ${a.fired_at ? "down" : "up"}`}>{a.fired_at ? "Paused" : "Working"}</td>
+            <td className={`pr-4 font-sans font-semibold ${a.fired_at ? "text-[var(--muted)]" : "up"}`}>{a.fired_at ? "Paused" : "Working"}</td>
           </tr>))}</tbody></table>
 </div>
 
@@ -49,7 +49,7 @@ export default async function Leaderboard() {
       {!mk.length ? null : (
         <div className="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4">{mk.map(({ a, r }, i) => (
           <Link key={a.slug} href={`/a/${a.slug}`} className="card p-5 hover:border-[var(--brand)]">
-            <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate flex items-center gap-1.5"><MarketLogo id={a.spec.market} size={14} />{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "down" : "up"}`}>{r.live.fired ? "Paused" : "Working"}</span></div>
+            <div className="flex items-center gap-3"><span className="text-[var(--muted)] font-bold num w-6">{i + 1}</span><Avatar id={a.slug} name={a.name} size={38} /><div className="min-w-0 flex-1"><div className="font-bold">@{a.slug}</div><div className="text-xs text-[var(--muted)] truncate flex items-center gap-1.5"><MarketLogo id={a.spec.market} size={14} />{a.spec.market} · {a.spec.strategy.kind}</div></div><span className={`label ${r.live.fired ? "text-[var(--muted)]" : "up"}`}>{r.live.fired ? "Paused" : "Working"}</span></div>
             <div className="mt-4 flex items-end justify-between"><div><div className="text-xs text-[var(--muted)]">30-day edge</div><div className={`text-2xl font-bold num ${r.backtest.edge >= 0 ? "up" : "down"}`}>{sgn(r.backtest.edge)}</div><div className="text-xs text-[var(--muted)] num">live {sgn(r.live.ret)}</div></div><div className="w-28"><Spark data={r.backtest.curve} w={112} h={36} color={r.backtest.edge >= 0 ? "var(--up)" : "var(--down)"} /></div></div>
           </Link>))}</div>)}
 

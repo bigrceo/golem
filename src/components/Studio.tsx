@@ -35,10 +35,11 @@ export default function Studio() {
   const [name, setName] = useState("");
   const [launching, setLaunching] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [parent, setParent] = useState<{ slug: string; v: number } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { fetch("/api/floor").then((r) => r.json()).then((d) => setFloor(d.tokens ?? [])).catch(() => {}); }, []);
-  useEffect(() => { const q = new URLSearchParams(location.search); const t = q.get("q"); if (t) parseText(t); if (q.get("u") === "trench") setUniverse("trench"); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { const q = new URLSearchParams(location.search); const t = q.get("q"); if (t) parseText(t); if (q.get("u") === "trench") setUniverse("trench"); const f = q.get("from"); if (f) { setParent({ slug: f, v: Number(q.get("v") || 2) }); setName(f.replace(/-v\d+$/, "")); } }, []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (universe !== "market") return;
     if (timer.current) clearTimeout(timer.current);
@@ -62,7 +63,7 @@ export default function Studio() {
 
   const launch = async () => {
     setErr(null); setLaunching(true);
-    const r = await fetch("/api/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, kind: universe, spec: universe === "market" ? spec : trench }) }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
+    const r = await fetch("/api/create", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, kind: universe, spec: universe === "market" ? spec : trench, parent: parent?.slug, version: parent?.v }) }).then((x) => x.json()).catch(() => ({ error: "Network error" }));
     setLaunching(false);
     if (r.ok) router.push(`/a/${r.slug}?new=1`); else setErr(r.error ?? "Could not launch");
   };
@@ -161,7 +162,7 @@ export default function Studio() {
         <div className="space-y-5">
           {universe === "market" ? (
             <div className="card p-6">
-              <div className="flex items-center justify-between"><div className="label">Backtest · last 720 hourly candles</div><span className="text-xs text-[var(--muted)]">{loading ? "running…" : "real prices"}</span></div>
+              <div className="flex items-center justify-between"><div className="label">Backtest · last 720 hourly candles · not a live record</div><span className="text-xs text-[var(--muted)]">{loading ? "running…" : "real prices"}</span></div>
               {bt && <>
                 <p className="mt-3 text-sm">{bt.describe}</p>
                 <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">

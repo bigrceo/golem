@@ -57,6 +57,7 @@ export default function Nav() {
             {L("/studio", "Studio")}{L("/floor", "Floor")}{L("/agents", "Leaderboard")}{L("/app", "Vault")}
           </div>
           <div className="navr">
+            <a className="xb" href="https://x.com/getgolem" target="_blank" rel="noreferrer" aria-label="X"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.2l-4.9-6.4L6.3 22H3.2l7.3-8.3L1 2h6.3l4.4 5.9zm-1.1 18h1.7L6.3 3.9H4.5z"/></svg></a>
             <a className="xb" href="https://github.com/bigrceo/golem" target="_blank" rel="noreferrer" aria-label="GitHub"><GitHubIcon /></a>
             <Link href="/floor" className="btn btn-ghost hidden md:inline-flex">Enter the floor</Link>
             <Link href="/studio" className="btn btn-accent"><span className="sm:hidden">Build</span><span className="hidden sm:inline">Build an agent</span></Link>
@@ -74,7 +75,7 @@ export default function Nav() {
           </div>
         </div>
         <div className="mlist" inert={!mobile}>
-          <div>{ROWS.map(([, t, , h]) => <Link key={t} href={h}>{t}<span>↗</span></Link>)}<a href="https://github.com/bigrceo/golem" target="_blank" rel="noreferrer">GitHub<span>↗</span></a></div>
+          <div>{ROWS.map(([, t, , h]) => <Link key={t} href={h}>{t}<span>↗</span></Link>)}<a href="https://x.com/getgolem" target="_blank" rel="noreferrer">X · @getgolem<span>↗</span></a><a href="https://github.com/bigrceo/golem" target="_blank" rel="noreferrer">GitHub<span>↗</span></a></div>
         </div>
       </div>
     </nav>
