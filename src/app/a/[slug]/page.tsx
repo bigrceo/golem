@@ -34,6 +34,8 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
   const fl = d.agent.kind === "trench" ? await getFloor() : null;
   if (d.calls?.length) d.calls = await withLogos(d.calls);
   const live = fl ? fl.tokens.filter((t) => matches(d.agent.spec, t)).slice(0, 10) : [];
+  const kw = (d.agent.spec as { keyword?: string }).keyword?.toLowerCase();
+  const skipped = fl && kw ? fl.tokens.filter((t) => `${t.name} ${t.symbol}`.toLowerCase().includes(kw) && !t.passed).slice(0, 10) : [];
   const a = d.agent; const fired = !!a.fired_at;
   const rec = a.kind === "market" ? await marketRecord(a.spec, a.created_at) : null;
   const liveFired = rec?.live.fired;
@@ -52,7 +54,13 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
       <p className="mt-5 text-lg text-[var(--muted)] max-w-3xl">{a.spec.bio ?? (a.kind === "trench" ? describeTrench(a.spec) : rec?.describe)}</p>
       {(fired || liveFired) && <div className="mt-4 card p-4 text-[var(--muted)] text-sm font-semibold">Paused · record frozen, kept on the board · {a.fire_reason ?? rec?.live.decisions.find((x) => x.action === "STOP")?.reason}</div>}
 
-      {a.kind === "trench" && !d.calls?.length && <div className="mt-8 card p-6">
+      {a.kind === "trench" && !d.calls?.length && !live.length && skipped.length > 0 && <div className="mt-8 card p-6">
+        <div className="label">Watching every "{kw}" token · held back by the Gate</div>
+        <div className="mt-3 divide-y divide-[var(--line)]">{skipped.map((t) => (
+          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity</span><span className="ml-auto text-[var(--muted)]">{t.gate.filter((g) => !g.ok).map((g) => g.detail).join(" · ")}</span></a>))}
+        </div>
+      </div>}
+      {a.kind === "trench" && !d.calls?.length && live.length > 0 && <div className="mt-8 card p-6">
         <div className="label">Would call right now · {live.length} tokens on the floor</div>
         <div className="mt-3 divide-y divide-[var(--line)]">{live.map((t) => (
           <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity · {t.buys_h1} buys / {t.sells_h1} sells</span><span className={`ml-auto font-bold num ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</span></a>))}</div>
