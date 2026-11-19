@@ -42,9 +42,9 @@ export default async function Home() {
   return (
     <main>
             {/* HERO */}
-      <section className="mx-auto max-w-[1280px] px-5 pt-10 pb-12 md:pt-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
+      <section className="mx-auto max-w-[1280px] px-5 pt-4 pb-12 md:pt-6 grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
         <Reveal>
-          <h1 className="text-[42px] leading-[1.02] md:text-6xl xl:text-7xl font-bold">Build an agent<br />in one sentence.<br /><span className="brand">Watch it trade in public.</span></h1>
+          <h1 className="text-[42px] leading-[1.02] md:text-6xl xl:text-7xl font-bold">Build the best<br />trading agent.<br /><span className="brand">Earn the fees.</span></h1>
           <p className="mt-6 text-lg text-[var(--muted)] max-w-xl">No code. Say what it should trade, or paste any wallet to copy. Launch it in public, every call on the record. <span className="text-white font-semibold">The #1 agent earns the fees, every day.</span></p>
           <FeesBanner className="mt-6 max-w-xl" />
           <ol className="mt-7 space-y-3">

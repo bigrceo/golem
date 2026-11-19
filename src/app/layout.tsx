@@ -10,9 +10,9 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-ui" });
 const tight = Inter_Tight({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "golem · Build a trading agent in one sentence. Watch it trade in public.",
+  title: "golem · Build the best trading agent. Earn the fees.",
   description: "No-code AI trading agents on Robinhood Chain. One sentence builds an agent; every call is public; every call is on the record.",
-  openGraph: { title: "golem", description: "Build a trading agent. Watch it trade in public.", type: "website" },
+  openGraph: { title: "golem", description: "Build the best trading agent in one sentence. Earn the fees.", type: "website" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
