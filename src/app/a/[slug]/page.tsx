@@ -57,13 +57,13 @@ export default async function AgentProfile({ params }: { params: Promise<{ slug:
       {a.kind === "trench" && !d.calls?.length && !live.length && skipped.length > 0 && <div className="mt-8 card p-6">
         <div className="label">Watching every "{kw}" token · held back by the Gate</div>
         <div className="mt-3 divide-y divide-[var(--line)]">{skipped.map((t) => (
-          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity</span><span className="ml-auto text-[var(--muted)]">{t.gate.filter((g) => !g.ok).map((g) => g.detail).join(" · ")}</span></a>))}
+          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} MC · ${k(t.liq)} liquidity</span><span className="ml-auto text-[var(--muted)]">{t.gate.filter((g) => !g.ok).map((g) => g.detail).join(" · ")}</span></a>))}
         </div>
       </div>}
       {a.kind === "trench" && !d.calls?.length && live.length > 0 && <div className="mt-8 card p-6">
         <div className="label">Would call right now · {live.length} tokens on the floor</div>
         <div className="mt-3 divide-y divide-[var(--line)]">{live.map((t) => (
-          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} FDV · ${k(t.liq)} liquidity · {t.buys_h1} buys / {t.sells_h1} sells</span><span className={`ml-auto font-bold num ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</span></a>))}</div>
+          <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-3 flex items-center gap-3 text-sm"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={30} /><b>${t.symbol}</b><span className="text-[var(--muted)] num">${k(t.fdv)} MC · ${k(t.liq)} liquidity · {t.buys_h1} buys / {t.sells_h1} sells</span><span className={`ml-auto font-bold num ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}%</span></a>))}</div>
       </div>}
       {a.kind === "trench" && d.stats && d.calls?.length ? <>
         <div className="mt-8 stats border-y border-[var(--line)] py-6">

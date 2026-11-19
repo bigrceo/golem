@@ -19,7 +19,7 @@ export function gate(t: FloorToken, big: Map<string, number>, now = Date.now()) 
   const ratio = t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1 ? Infinity : 0;
   const checks = [
     { name: "Liquidity", ok: t.liq >= 3000, detail: `$${Math.round(t.liq).toLocaleString("en-US")} in the pool, needs $3,000` },
-    { name: "Depth", ok: t.fdv > 0 && t.liq / t.fdv >= 0.05, detail: `pool holds ${t.fdv ? ((t.liq / t.fdv) * 100).toFixed(1) : 0}% of FDV, needs 5%` },
+    { name: "Depth", ok: t.fdv > 0 && t.liq / t.fdv >= 0.05, detail: `pool holds ${t.fdv ? ((t.liq / t.fdv) * 100).toFixed(1) : 0}% of market cap, needs 5%` },
     { name: "Sellable", ok: t.sells_h1 > 0, detail: `${t.sells_h1} sells this hour` },
     { name: "Organic", ok: ratio <= 20, detail: ratio === Infinity ? "only buys, no sells" : `${ratio.toFixed(1)} buys per sell` },
     { name: "Original", ok: !copy, detail: copy ? `a bigger $${t.symbol} exists` : "biggest token with this ticker" },
@@ -47,7 +47,7 @@ async function build() {
   for (const t of all) { const g = gate(t, big, now); t.passed = g.passed ? 1 : 0; t.gate = g.checks; }
   const live = all.filter((t) => t.price > 0 && t.liq >= 1000);
   const tokens = live.sort((a, b) => b.passed - a.passed || b.vol_h24 - a.vol_h24).slice(0, 60);
-  const checks = live.filter((t) => t.passed).slice(0, 12).map((t) => ({ agent: "scout", symbol: t.symbol, t: now, passed: 1, reason: `Gate passed. $${Math.round(t.fdv / 1000)}K FDV, $${Math.round(t.liq / 1000)}K liquidity, ${t.buys_h1} buys / ${t.sells_h1} sells this hour.` }))
+  const checks = live.filter((t) => t.passed).slice(0, 12).map((t) => ({ agent: "scout", symbol: t.symbol, t: now, passed: 1, reason: `Gate passed. $${Math.round(t.fdv / 1000)}K MC, $${Math.round(t.liq / 1000)}K liquidity, ${t.buys_h1} buys / ${t.sells_h1} sells this hour.` }))
     .concat(live.filter((t) => !t.passed && !RESERVED.has(t.symbol.toUpperCase())).slice(0, 8).map((t) => ({ agent: "scout", symbol: t.symbol, t: now, passed: 0, reason: t.gate.filter((c) => !c.ok).map((c) => `${c.name}: ${c.detail}`).join("; ") })));
   return { at: now, lastRun: now, live: true, stats: { pools: toks.size, tracked: live.length, passed: live.filter((t) => t.passed).length, blocked: live.filter((t) => !t.passed).length }, tokens, checks };
 }

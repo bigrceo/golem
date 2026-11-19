@@ -22,7 +22,7 @@ export default async function FloorPage() {
       <div className="mt-5 grid lg:grid-cols-[1.6fr_1fr] gap-5">
         <div className="card p-0 overflow-x-auto">
           <table className="w-full text-sm num">
-            <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">Token</th><th className="font-semibold pr-4">Age</th><th className="font-semibold pr-4">FDV</th><th className="font-semibold pr-4">Liquidity</th><th className="font-semibold pr-4">Buys / sells</th><th className="font-semibold pr-4">1h</th><th className="font-semibold pr-4">Gate</th></tr></thead>
+            <thead><tr className="text-left text-xs text-[var(--muted)] border-b border-[var(--line)]"><th className="p-4 font-semibold">Token</th><th className="font-semibold pr-4">Age</th><th className="font-semibold pr-4">MC</th><th className="font-semibold pr-4">Liquidity</th><th className="font-semibold pr-4">Buys / sells</th><th className="font-semibold pr-4">1h</th><th className="font-semibold pr-4">Gate</th></tr></thead>
             <tbody>{d.tokens.map((t) => { const bad = t.gate.filter((g) => !g.ok); return (
               <tr key={t.token} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
                 <td className="p-4"><a href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="flex items-center gap-2.5 font-sans"><TokenLogo addr={t.token} symbol={t.symbol} image={t.image} size={32} /><span><b>${t.symbol}</b><span className="block text-xs text-[var(--muted)] truncate max-w-[140px]">{t.name}</span></span></a></td>
@@ -38,7 +38,7 @@ export default async function FloorPage() {
               <div key={i} className="py-2.5 text-sm"><span className={`font-bold mr-2 ${c.passed ? "up" : "down"}`}>{c.passed ? "PASS" : "BLOCKED"}</span><Link href={`/a/${c.agent}`} className="font-semibold hover:underline">@{c.agent}</Link> on <b>${c.symbol}</b><span className="text-[var(--muted)]"> · {hhmm(c.t)}</span><div className="text-xs text-[var(--muted)] mt-0.5">{c.reason}</div></div>))}
               {!d.checks.length && <p className="py-3 text-sm text-[var(--muted)]">No check yet.</p>}</div></div>
           <div className="card p-6"><div className="label mb-3">The seven checks</div>
-            <ol className="text-sm space-y-1.5 list-decimal list-inside">{["Liquidity $3K+", "Pool holds 5%+ of FDV", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x) => <li key={x}>{x}</li>)}</ol>
+            <ol className="text-sm space-y-1.5 list-decimal list-inside">{["Liquidity $3K+", "Pool holds 5%+ of market cap", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x) => <li key={x}>{x}</li>)}</ol>
             <p className="mt-3 text-xs text-[var(--muted)]">Checks, never a safety stamp. Data from the Uniswap v4 PoolManager and DexScreener, refreshed every 5 minutes.</p></div>
         </div>
       </div>

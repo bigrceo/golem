@@ -54,7 +54,7 @@ export default function CopyWallet() {
             {p.rows.slice(0, 14).map((r) => (
               <div key={r.token} className="flex items-center gap-3 p-3 border-b border-white/5 last:border-0">
                 <TokenLogo addr={r.token} symbol={r.symbol} image={r.image} size={32} />
-                <div className="flex-1 min-w-0"><div className="font-semibold">${r.symbol}</div><div className="text-sm opacity-60 truncate">{r.held ? "Holding" : r.holdMin != null ? `Held ${dur(r.holdMin)}` : "Traded"} · {k(r.fdv)} FDV</div></div>
+                <div className="flex-1 min-w-0"><div className="font-semibold">${r.symbol}</div><div className="text-sm opacity-60 truncate">{r.held ? "Holding" : r.holdMin != null ? `Held ${dur(r.holdMin)}` : "Traded"} · {k(r.fdv)} MC</div></div>
                 <div className={r.ch24 >= 0 ? "up" : "down"}>{r.ch24 >= 0 ? "+" : ""}{r.ch24.toFixed(0)}%</div>
               </div>))}
           </div>

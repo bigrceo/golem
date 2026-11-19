@@ -137,8 +137,8 @@ export default function Studio() {
                 <label className="block"><span className="text-sm text-[var(--muted)]">Only tokens named</span><input value={trench.keyword ?? ""} onChange={(e) => setTrench({ ...trench, keyword: e.target.value.trim() || undefined })} placeholder="any name, e.g. gta" className="mt-1 w-full" /></label>
                 <Slider label="Max token age" value={trench.maxAgeH} min={1} max={72} step={1} unit="h" onChange={(x) => setTrench({ ...trench, maxAgeH: x })} />
                 <Slider label="Min liquidity" value={trench.minLiq} min={1000} max={100000} step={1000} prefix="$" onChange={(x) => setTrench({ ...trench, minLiq: x })} />
-                <Slider label="Min FDV" value={trench.minFdv} min={1000} max={500000} step={1000} prefix="$" onChange={(x) => setTrench({ ...trench, minFdv: x })} />
-                <Slider label="Max FDV" value={trench.maxFdv} min={10000} max={5000000} step={10000} prefix="$" onChange={(x) => setTrench({ ...trench, maxFdv: x })} />
+                <Slider label="Min MC" value={trench.minFdv} min={1000} max={500000} step={1000} prefix="$" onChange={(x) => setTrench({ ...trench, minFdv: x })} />
+                <Slider label="Max MC" value={trench.maxFdv} min={10000} max={5000000} step={10000} prefix="$" onChange={(x) => setTrench({ ...trench, maxFdv: x })} />
                 {trench.side === "bull" && <>
                   <Slider label="Min buys this hour" value={trench.minBuysH1} min={0} max={300} step={5} onChange={(x) => setTrench({ ...trench, minBuysH1: x })} />
                   <Slider label="Min buys per sell" value={trench.minBuyRatio} min={0} max={5} step={0.1} onChange={(x) => setTrench({ ...trench, minBuyRatio: x })} />
@@ -189,7 +189,7 @@ export default function Studio() {
                 {live.slice(0, 8).map((t) => (
                   <a key={t.token} href={`https://dexscreener.com/robinhood/${t.pair}`} target="_blank" className="py-2.5 flex items-center gap-3 text-sm hover:bg-[var(--bg2)] -mx-2 px-2 rounded">
                     <TokenLogo addr={t.token} symbol={t.symbol} image={t.image} />
-                    <span className="font-bold w-24 truncate">${t.symbol}</span><span className="text-[var(--muted)] num flex-1">${k(t.fdv)} FDV · ${k(t.liq)} liq</span><span className={`num font-semibold ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}% 1h</span>
+                    <span className="font-bold w-24 truncate">${t.symbol}</span><span className="text-[var(--muted)] num flex-1">${k(t.fdv)} MC · ${k(t.liq)} liq</span><span className={`num font-semibold ${t.ch_h1 >= 0 ? "up" : "down"}`}>{t.ch_h1 >= 0 ? "+" : ""}{t.ch_h1}% 1h</span>
                   </a>
                 ))}
                 {!live.length && <p className="py-4 text-sm text-[var(--muted)]">Nothing on the floor matches these rules right now. Loosen a filter, or launch it and it will call the next one that does.</p>}

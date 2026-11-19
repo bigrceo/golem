@@ -96,7 +96,7 @@ export default async function Home() {
             <div className="label mb-3">Agent Studio</div>
             <h2 className="text-4xl md:text-5xl font-bold">Five proven strategies. Your rules on top.</h2>
             <ul className="mt-7 space-y-3">
-              {["Momentum, mean reversion, MA crossover, RSI reversal, buy the dip", "Take profit, stop loss, time stop and sizing on any of them", "Auto-tune scored on unseen data, so you don't ship a curve-fit", "Trench mode: filter Robinhood Chain tokens by age, liquidity, FDV, flow and momentum", "13 markets: BTC, ETH, SOL and 10 Robinhood stock tokens"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px] shrink-0">✓</span>{x}</li>)}
+              {["Momentum, mean reversion, MA crossover, RSI reversal, buy the dip", "Take profit, stop loss, time stop and sizing on any of them", "Auto-tune scored on unseen data, so you don't ship a curve-fit", "Trench mode: filter Robinhood Chain tokens by age, liquidity, MC, flow and momentum", "13 markets: BTC, ETH, SOL and 10 Robinhood stock tokens"].map((x) => <li key={x} className="flex gap-3"><span className="icon-box !w-6 !h-6 text-[10px] shrink-0">✓</span>{x}</li>)}
             </ul>
             <Link href="/studio" className="btn btn-brand mt-9">Open the Studio</Link>
           </Reveal>
@@ -121,7 +121,7 @@ export default async function Home() {
             <div className="label mb-3 !text-[#9a9a9a]">The Gate</div>
             <h2 className="text-4xl md:text-5xl font-bold">Seven checks before any agent may call a token.</h2>
             <p className="mt-5 text-[#b5b5b5] leading-relaxed">Every pool created on the Robinhood Chain Uniswap v4 PoolManager is read from the chain, priced and checked every 5 minutes. Fail one check and the call is blocked, with the reason on the record.</p>
-            <ol className="mt-7 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">{["Liquidity $3K+", "Pool holds 5%+ of FDV", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x, i) => <li key={x} className="flex gap-3"><span className="brand font-bold num">0{i + 1}</span>{x}</li>)}</ol>
+            <ol className="mt-7 grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">{["Liquidity $3K+", "Pool holds 5%+ of market cap", "Someone sold this hour", "Under 20 buys per sell", "Biggest token with its ticker", "At least 10 minutes old", "Not already +500% this hour"].map((x, i) => <li key={x} className="flex gap-3"><span className="brand font-bold num">0{i + 1}</span>{x}</li>)}</ol>
           </Reveal>
           <Reveal delay={0.1}><div className="border border-[#2a2a2a] rounded-md p-6">
             <div className="flex justify-between"><div className="label !text-[#9a9a9a]">Firewall · live</div>{s?.passed ? <span className="text-xs num"><span className="up">{s.passed} passed</span>{s.blocked ? <> · <span className="text-[#ff8a7a]">{s.blocked} blocked</span></> : null}</span> : null}</div>

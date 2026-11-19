@@ -21,11 +21,11 @@ export type Trench = {
 };
 
 export const HOUSE: { slug: string; name: string; spec: Trench; bio: string }[] = [
-  { slug: "scout", name: "Scout", bio: "Calls bullish on tokens up to 72h old that pass the Gate, with $5K+ liquidity, $10K–$500K FDV and more buyers than sellers this hour.",
+  { slug: "scout", name: "Scout", bio: "Calls bullish on tokens up to 72h old that pass the Gate, with $5K+ liquidity, $10K–$500K MC and more buyers than sellers this hour.",
     spec: { universe: "trenches", side: "bull", maxAgeH: 72, minLiq: 5000, minFdv: 10000, maxFdv: 500000, minBuysH1: 15, minBuyRatio: 1.1, minChH1: 0, maxChH1: 150, minChM5: -100, tp: 60, sl: 30, maxHold: 24, fireLine: 25 } },
-  { slug: "grad", name: "Grad", bio: "Calls bullish on fresh pools under 6h old above $15K FDV with 30+ buys this hour and positive 5-minute momentum.",
+  { slug: "grad", name: "Grad", bio: "Calls bullish on fresh pools under 6h old above $15K MC with 30+ buys this hour and positive 5-minute momentum.",
     spec: { universe: "trenches", side: "bull", maxAgeH: 6, minLiq: 4000, minFdv: 15000, maxFdv: 2000000, minBuysH1: 30, minBuyRatio: 1, minChH1: -100, maxChH1: 400, minChM5: 0.1, tp: 40, sl: 25, maxHold: 6, fireLine: 25 } },
-  { slug: "skeptic", name: "Skeptic", bio: "Calls bearish on copycat tickers: a token whose symbol already exists with a bigger FDV.",
+  { slug: "skeptic", name: "Skeptic", bio: "Calls bearish on copycat tickers: a token whose symbol already exists with a bigger market cap.",
     spec: { universe: "trenches", side: "bear", maxAgeH: 72, minLiq: 1000, minFdv: 5000, maxFdv: 5000000, minBuysH1: 0, minBuyRatio: 0, minChH1: -100, maxChH1: 10000, minChM5: -100, copycatsOnly: true, tp: 40, sl: 30, maxHold: 24, fireLine: 30 } },
 ];
 
@@ -85,7 +85,7 @@ async function refresh(env: Env) {
   }
   const toks: Tok[] = [];
   for (const [k, p] of best) toks.push({ token: k, pair: p.pairAddress, symbol: p.baseToken.symbol, name: p.baseToken.name, created: p.pairCreatedAt ?? now, first_seen: now, last_seen: now, price: +(p.priceUsd ?? 0), fdv: p.fdv ?? 0, liq: p.liquidity?.usd ?? 0, buys_h1: p.txns?.h1?.buys ?? 0, sells_h1: p.txns?.h1?.sells ?? 0, ch_m5: p.priceChange?.m5 ?? 0, ch_h1: p.priceChange?.h1 ?? 0, ch_h24: p.priceChange?.h24 ?? 0, vol_h24: p.volume?.h24 ?? 0, image: p.info?.imageUrl ?? null, passed: 0, gate: "" });
-  // biggest FDV per symbol, for copycat detection
+  // biggest MC per symbol, for copycat detection
   const bigBySymbol = new Map<string, number>();
   for (const t of toks) { const s = t.symbol.toUpperCase(); bigBySymbol.set(s, Math.max(bigBySymbol.get(s) ?? 0, t.fdv)); }
   for (const t of toks) { const g = gate(t, bigBySymbol, now); t.passed = g.passed ? 1 : 0; t.gate = JSON.stringify(g.checks); }
@@ -102,7 +102,7 @@ function gate(t: Tok, big: Map<string, number>, now: number): { passed: boolean;
   const ratio = t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1 ? Infinity : 0;
   const checks: Check[] = [
     { name: "Liquidity", ok: t.liq >= 3000, detail: `$${Math.round(t.liq).toLocaleString("en-US")} in the pool, needs $3,000` },
-    { name: "Depth", ok: t.fdv > 0 && t.liq / t.fdv >= 0.05, detail: `pool holds ${t.fdv ? ((t.liq / t.fdv) * 100).toFixed(1) : 0}% of FDV, needs 5%` },
+    { name: "Depth", ok: t.fdv > 0 && t.liq / t.fdv >= 0.05, detail: `pool holds ${t.fdv ? ((t.liq / t.fdv) * 100).toFixed(1) : 0}% of market cap, needs 5%` },
     { name: "Sellable", ok: t.sells_h1 > 0, detail: `${t.sells_h1} sells this hour` },
     { name: "Organic", ok: ratio <= 20, detail: ratio === Infinity ? "only buys, no sells" : `${ratio.toFixed(1)} buys per sell` },
     { name: "Original", ok: !copy, detail: copy ? `a bigger $${t.symbol} exists` : "biggest token with this ticker" },
@@ -145,7 +145,7 @@ async function runAgents(env: Env, toks: Tok[], big: Map<string, number>) {
         const t = byToken.get(tok); if (!t || !t.price || called.has(a.slug + ":" + tok)) continue;
         called.add(a.slug + ":" + tok);
         if (!t.passed) { stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 0, ?)").bind(a.slug, tok, t.symbol, now, "Wallet bought it, Gate held it back")); continue; }
-        const reason = `Copied: the wallet just bought $${t.symbol}. Gate passed, $${short(t.fdv)} FDV, $${short(t.liq)} liquidity.`;
+        const reason = `Copied: the wallet just bought $${t.symbol}. Gate passed, $${short(t.fdv)} MC, $${short(t.liq)} liquidity.`;
         stmts.push(env.DB.prepare("insert into calls (agent, token, symbol, side, entry_price, entry_fdv, t, reason) values (?, ?, ?, 'bull', ?, ?, ?, ?)").bind(a.slug, tok, t.symbol, t.price, t.fdv, now, reason));
         stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 1, ?)").bind(a.slug, tok, t.symbol, now, reason));
       }
@@ -162,7 +162,7 @@ async function runAgents(env: Env, toks: Tok[], big: Map<string, number>) {
         if (!t.passed) { const bad = checks.filter((c) => !c.ok).map((c) => `${c.name}: ${c.detail}`).join("; "); stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 0, ?)").bind(a.slug, t.token, t.symbol, now, bad)); called.add(a.slug + ":" + t.token); continue; }
       } else if (s.copycatsOnly && (!copy || RESERVED.has(t.symbol.toUpperCase()))) continue;
       const reason = s.side === "bull"
-        ? `Gate passed. $${short(t.fdv)} FDV, $${short(t.liq)} liquidity, ${t.buys_h1} buys / ${t.sells_h1} sells this hour, ${sign(t.ch_h1)}% 1h.`
+        ? `Gate passed. $${short(t.fdv)} MC, $${short(t.liq)} liquidity, ${t.buys_h1} buys / ${t.sells_h1} sells this hour, ${sign(t.ch_h1)}% 1h.`
         : `Copycat: a bigger $${t.symbol} exists ($${short(big.get(t.symbol.toUpperCase()) ?? 0)} vs $${short(t.fdv)}).`;
       stmts.push(env.DB.prepare("insert into calls (agent, token, symbol, side, entry_price, entry_fdv, t, reason) values (?, ?, ?, ?, ?, ?, ?, ?)").bind(a.slug, t.token, t.symbol, s.side, t.price, t.fdv, now, reason));
       stmts.push(env.DB.prepare("insert into checks (agent, token, symbol, t, passed, reason) values (?, ?, ?, ?, 1, ?)").bind(a.slug, t.token, t.symbol, now, reason));
