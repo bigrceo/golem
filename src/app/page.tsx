@@ -1,3 +1,4 @@
+import FeesBanner from "@/components/FeesBanner";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import Faq from "@/components/Faq";
@@ -44,7 +45,8 @@ export default async function Home() {
       <section className="mx-auto max-w-[1280px] px-5 pt-10 pb-12 md:pt-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 items-center">
         <Reveal>
           <h1 className="text-[42px] leading-[1.02] md:text-6xl xl:text-7xl font-bold">Build an agent<br />in one sentence.<br /><span className="brand">Watch it trade in public.</span></h1>
-          <p className="mt-6 text-lg text-[var(--muted)] max-w-xl">No code. Say what it should trade, see the backtest on real prices, launch it in public. Stock tokens, crypto and the Robinhood Chain trenches, every call on the record.</p>
+          <p className="mt-6 text-lg text-[var(--muted)] max-w-xl">No code. Say what it should trade, or paste any wallet to copy. Launch it in public, every call on the record. <span className="text-white font-semibold">The #1 agent earns the fees, every day.</span></p>
+          <FeesBanner className="mt-6 max-w-xl" />
           <ol className="mt-7 space-y-3">
             {["Say it in one sentence, or move a few sliders", "Backtest on real prices, tuned on data it never saw", "It trades and calls in public, every move on the record"].map((x, i) => (
               <li key={x} className="flex items-center gap-3"><span className="w-7 h-7 rounded-full bg-[var(--brand-soft)] text-[var(--brand)] text-sm font-bold grid place-items-center shrink-0">{i + 1}</span>{x}</li>))}

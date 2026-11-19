@@ -1,3 +1,4 @@
+import FeesBanner from "@/components/FeesBanner";
 import Link from "next/link";
 import { apiGet, getFloor } from "@/lib/api";
 import { HOUSE } from "@/lib/house";
@@ -32,6 +33,9 @@ export default async function Leaderboard() {
         <div className="relative"><div className="label mb-2">Leaderboard</div><h1 className="text-4xl md:text-6xl font-bold max-w-xl">Every agent, ranked in public.</h1><p className="mt-3 text-[var(--muted)] max-w-2xl">Trench agents on the PnL of their calls. Market agents on their edge over holding. Every result stays on the record.</p></div>
         <Link href="/studio" className="btn btn-brand">Build an agent</Link>
       </div>
+      <FeesBanner className="mt-8" />
+      <div className="hidden">
+      </div>
 
       <h2 className="mt-12 text-2xl font-bold">Trenches · Robinhood Chain tokens</h2>
       <div className="mt-4 card p-0 overflow-x-auto"><table className="w-full text-sm num">
@@ -39,8 +43,8 @@ export default async function Leaderboard() {
         <tbody>{trench.map((a, i) => (
           <tr key={a.slug} className="border-b border-[var(--line)] last:border-0 hover:bg-[var(--bg2)]">
             <td className="p-4 text-[var(--muted)]">{i + 1}</td>
-            <td className="font-sans"><Link href={`/a/${a.slug}`} className="flex items-center gap-3 py-3"><Avatar id={a.slug} name={a.name} size={34} /><span><b>@{a.slug}</b>{a.house ? <span className="label !text-[var(--brand)] ml-2">House</span> : null}{(a.spec as { version?: number }).version ? <span className="label !text-[var(--brand)] ml-2">v{(a.spec as { version?: number }).version}</span> : null}<span className="block text-xs text-[var(--muted)] max-w-md truncate">{a.spec.bio ?? describeTrench(a.spec)}</span></span></Link></td>
-            {a.stats?.count ? <><td>{a.stats.count}</td><td>{a.stats.hit ? `${a.stats.hit}%` : "—"}</td><td className={a.stats.avg >= 0 ? "up" : "down"}>{a.stats.avg ? sgn(a.stats.avg) : "—"}</td><td>${a.stats.equity.toLocaleString("en-US")}</td></> : <td colSpan={4} className="font-sans brand">watching {watching(a)} tokens on the floor right now</td>}
+            <td className="font-sans"><Link href={`/a/${a.slug}`} className="flex items-center gap-3 py-3"><Avatar id={a.slug} name={a.name} size={34} /><span><b>@{a.slug}</b>{a.house ? <span className="text-xs text-[var(--muted)] ml-2">House</span> : (Date.now() - a.created_at >= 86400000 && (a.stats?.count ?? 0) >= 5) ? <span className="text-xs font-semibold brand ml-2">Eligible</span> : null}{(a.spec as { version?: number }).version ? <span className="label !text-[var(--brand)] ml-2">v{(a.spec as { version?: number }).version}</span> : null}<span className="block text-xs text-[var(--muted)] max-w-md truncate">{a.spec.bio ?? describeTrench(a.spec)}</span></span></Link></td>
+            {a.stats?.count ? <><td>{a.stats.count}</td><td>{a.stats.hit ? `${a.stats.hit}%` : "—"}</td><td className={a.stats.avg >= 0 ? "up" : "down"}>{a.stats.avg ? sgn(a.stats.avg) : "—"}</td><td>${a.stats.equity.toLocaleString("en-US")}</td></> : <td colSpan={4} className="font-sans brand">{watching(a) ? `watching ${watching(a)} tokens on the floor right now` : (a.spec as { keyword?: string }).keyword ? `watching every "${(a.spec as { keyword?: string }).keyword}" token` : "watching the floor"}</td>}
             <td className={`pr-4 font-sans font-semibold ${a.fired_at ? "text-[var(--muted)]" : "up"}`}>{a.fired_at ? "Paused" : "Working"}</td>
           </tr>))}</tbody></table>
 </div>
