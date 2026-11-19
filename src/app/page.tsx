@@ -1,5 +1,4 @@
 import CaBar from "@/components/CaBar";
-import CaBar from "@/components/CaBar";
 import FeesBanner from "@/components/FeesBanner";
 import Link from "next/link";
 import Reveal from "@/components/Reveal";
@@ -49,7 +48,6 @@ export default async function Home() {
           <h1 className="text-[42px] leading-[1.02] md:text-6xl xl:text-7xl font-bold">Build the best<br />trading agent.<br /><span className="brand">Earn the fees.</span></h1>
           <p className="mt-6 text-lg text-[var(--muted)] max-w-xl">No code. Say what it should trade, or paste any wallet to copy. Launch it in public, every call on the record. <span className="text-white font-semibold">The #1 agent earns the fees, every day.</span></p>
           <FeesBanner className="mt-6 max-w-xl" />
-          <CaBar className="mt-3 max-w-xl" />
           <CaBar className="mt-3 max-w-xl" />
           <ol className="mt-7 space-y-3">
             {["Say it in one sentence, or move a few sliders", "Backtest on real prices, tuned on data it never saw", "It trades and calls in public, every move on the record"].map((x, i) => (
