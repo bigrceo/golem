@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   } else if (b?.kind === "trench") {
     const s = b.spec as Trench;
     spec = { universe: "trenches", side: s.side === "bear" ? "bear" : "bull", maxAgeH: clamp(s.maxAgeH, 1, 72, 24), minLiq: clamp(s.minLiq, 1000, 1e7, 5000), minFdv: clamp(s.minFdv, 1000, 1e8, 10000), maxFdv: clamp(s.maxFdv, 5000, 1e9, 300000),
-      minBuysH1: clamp(s.minBuysH1, 0, 5000, 20), minBuyRatio: clamp(s.minBuyRatio, 0, 20, 1.2), minChH1: clamp(s.minChH1, -100, 1000, 0), maxChH1: clamp(s.maxChH1, -100, 10000, 200), minChM5: clamp(s.minChM5, -100, 100, -100), copycatsOnly: !!s.copycatsOnly,
+      minBuysH1: clamp(s.minBuysH1, 0, 5000, 20), minBuyRatio: clamp(s.minBuyRatio, 0, 20, 1.2), minChH1: clamp(s.minChH1, -100, 1000, 0), maxChH1: clamp(s.maxChH1, -100, 10000, 200), minChM5: clamp(s.minChM5, -100, 100, -100), copycatsOnly: !!s.copycatsOnly, ...(typeof s.keyword === "string" && s.keyword.trim() ? { keyword: s.keyword.trim().slice(0, 24) } : {}),
       tp: clamp(s.tp, 5, 500, 50), sl: clamp(s.sl, 5, 90, 25), maxHold: clamp(s.maxHold, 1, 72, 12), fireLine: clamp(s.fireLine, 5, 60, 25) };
   } else if (b?.kind === "copy") {
     const w = String((b.spec as unknown as { wallet?: string })?.wallet ?? "").toLowerCase();

@@ -304,8 +304,18 @@ async function snapshot(env: Env) {
   await env.SNAP.put("agents", JSON.stringify({ agents: list.agents, detail }));
 }
 
+/** One-off spec fixes queued in KV ("spec-patches": {slug: partialSpec}), applied once D1 answers. */
+async function applyPatches(env: Env) {
+  const v = await env.SNAP.get("spec-patches"); if (!v) return;
+  const patches = JSON.parse(v) as Record<string, Record<string, unknown>>;
+  for (const [slug, p] of Object.entries(patches)) for (const [k, val] of Object.entries(p))
+    await env.DB.prepare("update agents set spec = json_set(spec, ?, ?) where slug = ?").bind("$." + k, val as string, slug).run();
+  await env.SNAP.delete("spec-patches");
+}
+
 async function tick(env: Env) {
   await migratePending(env);
+  await applyPatches(env);
   await seedHouse(env);
   await env.DB.prepare("delete from tokens where first_seen < ? and (liq is null or liq < 1000) and token not in (select token from calls)").bind(Date.now() - 96 * H).run();
   let d: unknown; try { d = await discover(env); } catch (e) { d = { error: String(e).slice(0, 400) }; }
