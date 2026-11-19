@@ -16,7 +16,7 @@ const CALL_SIZE = 1000; // paper USDG per call, out of a 10,000 vault
 export type Trench = {
   universe: "trenches"; side: "bull" | "bear";
   maxAgeH: number; minLiq: number; minFdv: number; maxFdv: number; minBuysH1: number; minBuyRatio: number;
-  minChH1: number; maxChH1: number; minChM5: number; copycatsOnly?: boolean; failedGateOnly?: boolean;
+  minChH1: number; maxChH1: number; minChM5: number; copycatsOnly?: boolean; failedGateOnly?: boolean; keyword?: string;
   tp: number; sl: number; maxHold: number; fireLine: number;
 };
 
@@ -152,7 +152,7 @@ async function runAgents(env: Env, toks: Tok[], big: Map<string, number>) {
       continue;
     }
     const cands = toks.filter((t) => t.price > 0 && t.created >= now - s.maxAgeH * H && t.liq >= s.minLiq && t.fdv >= s.minFdv && t.fdv <= s.maxFdv && t.buys_h1 >= s.minBuysH1
-      && (t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1) >= s.minBuyRatio && t.ch_h1 >= s.minChH1 && t.ch_h1 <= s.maxChH1 && t.ch_m5 >= s.minChM5)
+      && (t.sells_h1 ? t.buys_h1 / t.sells_h1 : t.buys_h1) >= s.minBuyRatio && t.ch_h1 >= s.minChH1 && t.ch_h1 <= s.maxChH1 && t.ch_m5 >= s.minChM5 && (!s.keyword || `${t.name ?? ""} ${t.symbol ?? ""}`.toLowerCase().includes(s.keyword.toLowerCase())))
       .sort((x, y) => y.vol_h24 - x.vol_h24);
     for (const t of cands) {
       if (made >= 2 || called.has(a.slug + ":" + t.token)) continue;

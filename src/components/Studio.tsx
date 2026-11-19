@@ -134,6 +134,7 @@ export default function Studio() {
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-x-6 gap-y-4">
+                <label className="block"><span className="text-sm text-[var(--muted)]">Only tokens named</span><input value={trench.keyword ?? ""} onChange={(e) => setTrench({ ...trench, keyword: e.target.value.trim() || undefined })} placeholder="any name, e.g. gta" className="mt-1 w-full" /></label>
                 <Slider label="Max token age" value={trench.maxAgeH} min={1} max={72} step={1} unit="h" onChange={(x) => setTrench({ ...trench, maxAgeH: x })} />
                 <Slider label="Min liquidity" value={trench.minLiq} min={1000} max={100000} step={1000} prefix="$" onChange={(x) => setTrench({ ...trench, minLiq: x })} />
                 <Slider label="Min FDV" value={trench.minFdv} min={1000} max={500000} step={1000} prefix="$" onChange={(x) => setTrench({ ...trench, minFdv: x })} />
